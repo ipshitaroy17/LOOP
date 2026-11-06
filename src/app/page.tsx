@@ -9,7 +9,7 @@ export default function Home() {
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold"
         style={{
           backgroundColor: "var(--color-sage)",
-          color: "var(--color-charcoal)",
+          color: "#1F1F1F",
         }}
       >
         Skip to main content
@@ -77,10 +77,10 @@ export default function Home() {
           {/* CTA anchor — links to the section below, no fake sign-in */}
           <a
             href="#how-it-works"
-            className="inline-block rounded-full px-8 py-3 text-base font-semibold transition-colors"
+            className="inline-block rounded-full px-8 py-3 text-base font-semibold transition-colors hover:brightness-105"
             style={{
               backgroundColor: "var(--color-sage)",
-              color: "var(--color-charcoal)",
+              color: "#1F1F1F",
             }}
           >
             How LOOP works

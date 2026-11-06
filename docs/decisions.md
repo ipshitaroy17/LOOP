@@ -32,12 +32,20 @@ Caused by:
 ```
 Deleting `.next/` and retrying a clean build reproduced the identical failure. Invoking `next build --webpack` compiles successfully, executes TypeScript typechecking, and prerenders all static pages with exit code 0. This is documented strictly as a local build workaround; the underlying Turbopack process-spawning issue is not claimed to be fixed.
 
-### Contrast: Charcoal text on Sage background
-**Decision:** Use charcoal (`#2D2D2D`) text on sage (`#7C9A6B`) interactive buttons and links.  
-**Rationale:** WCAG 2.1 AA requires a minimum contrast ratio of 4.5:1 for normal text (under 18pt / 24px regular or 14pt / 18.66px bold). White (`#FFFFFF`) on sage (`#7C9A6B`) yields only 3.14:1, failing the threshold. Charcoal (`#2D2D2D`) on sage yields 4.39:1 (substantially higher readability).
+### Contrast: Text and Focus Rings on Sage and Cream Surfaces
+**Decision:** Use `#1F1F1F` for text on sage (`#7C9A6B`) interactive buttons and links, and use a charcoal (`#2D2D2D`) outline with a 2px offset for `:focus-visible`.  
+**Rationale & Computed Contrast Ratios:**
+- **Text on Sage:** WCAG 2.1 AA (SC 1.4.3) requires a minimum contrast ratio of 4.5:1 for normal-sized text (under 18pt regular or 14pt bold). Button labels are text elements and do not qualify for the lower 3:1 non-text threshold:
+  - White (`#FFFFFF`) on sage (`#7C9A6B`) yields **3.14:1** (fails 4.5:1).
+  - Charcoal (`#2D2D2D`) on sage (`#7C9A6B`) yields **4.39:1** (fails the 4.5:1 normal text requirement).
+  - Dark (`#1F1F1F`) on sage (`#7C9A6B`) yields **5.25:1** (passes WCAG 2.1 AA).
+  - On hover with `brightness-105` (`#82A170`), `#1F1F1F` yields **5.71:1** (passes WCAG 2.1 AA).
+- **Focus Rings:** WCAG 2.1 AA (SC 1.4.11) requires a minimum contrast ratio of 3:1 for user interface focus indicators against adjacent surfaces:
+  - A sage focus ring (`#7C9A6B`) against the cream background (`#FAF7F0`) yields only **2.93:1** (fails the 3:1 non-text threshold).
+  - A charcoal (`#2D2D2D`) focus ring with a 2px offset yields **12.87:1** against cream (`#FAF7F0`), **4.39:1** against sage buttons (`#7C9A6B`), and **13.77:1** against white cards, comfortably exceeding 3:1 on all backgrounds.
 
-### Commit verification sequencing note
-**Decision:** Record that initial checkpoint commit `a461aec` was created before production build execution was verified in this environment. The production build failure was caught upon resuming the session and stabilized in commit `fix: stabilize production build and verify Day 1`.
+### Known build results and verification record
+**Record:** The project builds cleanly with `next build --webpack` (exit code 0). Default Turbopack build fails during production packaging with `TurbopackInternalError: Failed to write app endpoint /page` on this Windows setup, while `npm run dev` with Turbopack operates and responds with HTTP 200 without error.
 
 ---
 

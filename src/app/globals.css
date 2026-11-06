@@ -60,8 +60,8 @@ body {
 /* ─── Accessible focus ring ─────────────────────────────────────────────── */
 /* Visible on keyboard, hidden on mouse click */
 :focus-visible {
-  outline: 3px solid var(--color-sage);
-  outline-offset: 3px;
+  outline: 3px solid var(--color-charcoal);
+  outline-offset: 2px;
   border-radius: 4px;
 }
 

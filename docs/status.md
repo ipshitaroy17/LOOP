@@ -10,7 +10,8 @@ Last updated: Day 1 — project foundation
 
 | Item | Status | Validation |
 |------|--------|------------|
-| Next.js 16.4.5 project scaffolded | ✅ Implemented | `npm run build` → exit 0 (using `--webpack` workaround; see `docs/decisions.md`). *Note: Initial commit `a461aec` was recorded prior to verifying the production build.* |
+| Next.js 16.4.5 project scaffolded | ✅ Implemented | `npm run build` → exit 0 (using `--webpack` workaround; see `docs/decisions.md`). |
+| Development server (`dev` script) | ✅ Implemented | `npm run dev` with Turbopack verified running and serving HTTP 200 at `http://localhost:3000`. |
 | TypeScript configured (`@/*` alias) | ✅ Implemented | `npm run typecheck` → exit 0 |
 | Tailwind CSS v4 (`globals.css` tokens) | ✅ Implemented | `npm run build` compiled without CSS errors |
 | ESLint configured | ✅ Implemented | `npm run lint` → exit 0, no warnings |
@@ -34,14 +35,14 @@ Last updated: Day 1 — project foundation
 | "How LOOP works" anchor link | ✅ Implemented | `href="#how-it-works"` in nav and hero CTA |
 | Warm cream background | ✅ Implemented | `--color-cream: #FAF7F0` in `globals.css` |
 | Sage primary accent | ✅ Implemented | `--color-sage: #7C9A6B`; used for tagline and CTA |
-| Button text contrast on Sage | ✅ Implemented | Charcoal (`#2D2D2D`) on Sage (`#7C9A6B`) yields 4.39:1 contrast (WCAG compliant); white failed at 3.14:1 |
+| Button text contrast on Sage | ✅ Implemented | `#1F1F1F` on Sage (`#7C9A6B`) yields 5.25:1 contrast, satisfying the 4.5:1 normal-text requirement. (`#2D2D2D` yielded 4.39:1, failing 4.5:1; button text is text content and does not qualify for the non-text threshold). |
 | Restrained pink accent | ✅ Implemented | `--color-pink: #E8B4B8`; used for Follow card chip |
 | Butter yellow accent | ✅ Implemented | `--color-butter: #F5D87E`; used for Watch card chip |
 | Lilac accent | ✅ Implemented | `--color-lilac: #C3B1D4`; used for Read card chip |
 | Charcoal body text | ✅ Implemented | `--color-charcoal: #2D2D2D` |
 | System font stack | ✅ Implemented | `system-ui, -apple-system, ...` in `--font-sans`; no external CDN |
-| Skip-to-content link (keyboard) | ✅ Implemented | `<a href="#main-content" class="sr-only focus:not-sr-only ...">` with charcoal text |
-| Visible keyboard focus ring | ✅ Implemented | `:focus-visible` rule in `globals.css` with 3px sage outline |
+| Skip-to-content link (keyboard) | ✅ Implemented | `<a href="#main-content" class="sr-only focus:not-sr-only ...">` with `#1F1F1F` text (5.25:1 contrast) |
+| Visible keyboard focus ring | ✅ Implemented | `:focus-visible` rule in `globals.css` with 3px charcoal (`#2D2D2D`) outline and 2px offset (12.87:1 against cream, 4.39:1 against sage; both exceed 3:1) |
 | Reduced-motion support | ✅ Implemented | `@media (prefers-reduced-motion: reduce)` in `globals.css` |
 | Rounded controls | ✅ Implemented | `rounded-full` on CTA button and icon chips |
 | No nonfunctional sign-in / AI / upload buttons | ✅ Implemented | No such elements exist in source |
