@@ -20,17 +20,19 @@
 **Decision:** Supabase for auth and PostgreSQL.  
 **Rationale:** Provides auth, row-level security, and a managed Postgres database in one service. Keys are blank in `.env.example`; no connection is made in Day 1.
 
-### Build toolchain workaround: Webpack for production build
-**Decision:** Configure `"build": "next build --webpack"` in `package.json`. Keep `"dev": "next dev"` unchanged.  
-**Rationale & exact error:** In this Windows execution environment, default `next build` (Turbopack) fails fatally during page endpoint write:
-```
-TurbopackInternalError: Failed to write app endpoint /page
-Caused by:
-- [project]/src/app/globals.css.css [app-client] (css)
-- creating new process
-- node process exited before we could connect to it with exit code: 0
-```
-Deleting `.next/` and retrying a clean build reproduced the identical failure. Invoking `next build --webpack` compiles successfully, executes TypeScript typechecking, and prerenders all static pages with exit code 0. This is documented strictly as a local build workaround; the underlying Turbopack process-spawning issue is not claimed to be fixed.
+### Build toolchain: Turbopack for production build and development
+**Decision:** Configure standard `"build": "next build"` in `package.json`.  
+**Observed Build Behavior & Context:**
+- **Restricted Environment:** When running `next build` inside the restricted sandbox environment, Turbopack failed during asset emission with:
+  ```
+  TurbopackInternalError: Failed to write app endpoint /page
+  Caused by:
+  - [project]/src/app/globals.css.css [app-client] (css)
+  - creating new process
+  - node process exited before we could connect to it with exit code: 0
+  ```
+- **The `--webpack` Side-Effect:** A temporary workaround using `"next build --webpack"` exited 0, but because the project is configured with `@tailwindcss/turbopack` and lacks `@tailwindcss/postcss` / `postcss.config.mjs`, Webpack omitted the Tailwind v4 utility classes from the final CSS output (`@layer utilities { @tailwind utilities; }` was output uncompiled), resulting in an unstyled page in the browser.
+- **Unrestricted Environment:** Running `next build` (Turbopack) in an unrestricted execution environment succeeds cleanly (exit code 0 in ~3.9s), generating the complete CSS bundle (`.next/static/chunks/*.css`, ~14.7 KB) containing all Tailwind utility classes and LOOP design tokens. Standard `next build` is restored.
 
 ### Contrast: Text and Focus Rings on Sage and Cream Surfaces
 **Decision:** Use `#1F1F1F` for text on sage (`#7C9A6B`) interactive buttons and links, and use a charcoal (`#2D2D2D`) outline with a 2px offset for `:focus-visible`.  
@@ -43,9 +45,6 @@ Deleting `.next/` and retrying a clean build reproduced the identical failure. I
 - **Focus Rings:** WCAG 2.1 AA (SC 1.4.11) requires a minimum contrast ratio of 3:1 for user interface focus indicators against adjacent surfaces:
   - A sage focus ring (`#7C9A6B`) against the cream background (`#FAF7F0`) yields only **2.93:1** (fails the 3:1 non-text threshold).
   - A charcoal (`#2D2D2D`) focus ring with a 2px offset yields **12.87:1** against cream (`#FAF7F0`), **4.39:1** against sage buttons (`#7C9A6B`), and **13.77:1** against white cards, comfortably exceeding 3:1 on all backgrounds.
-
-### Known build results and verification record
-**Record:** The project builds cleanly with `next build --webpack` (exit code 0). Default Turbopack build fails during production packaging with `TurbopackInternalError: Failed to write app endpoint /page` on this Windows setup, while `npm run dev` with Turbopack operates and responds with HTTP 200 without error.
 
 ---
 

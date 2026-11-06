@@ -10,10 +10,10 @@ Last updated: Day 1 — project foundation
 
 | Item | Status | Validation |
 |------|--------|------------|
-| Next.js 16.4.5 project scaffolded | ✅ Implemented | `npm run build` → exit 0 (using `--webpack` workaround; see `docs/decisions.md`). |
+| Next.js 16.4.5 project scaffolded | ✅ Implemented | `npm run build` (Turbopack) → exit 0 in unrestricted execution environment; see `docs/decisions.md`. |
 | Development server (`dev` script) | ✅ Implemented | `npm run dev` with Turbopack verified running and serving HTTP 200 at `http://localhost:3000`. |
 | TypeScript configured (`@/*` alias) | ✅ Implemented | `npm run typecheck` → exit 0 |
-| Tailwind CSS v4 (`globals.css` tokens) | ✅ Implemented | `npm run build` compiled without CSS errors |
+| Tailwind CSS v4 (`globals.css` tokens) | ✅ Implemented | Turbopack build generated 14.7 KB CSS bundle with all utility classes and tokens verified. |
 | ESLint configured | ✅ Implemented | `npm run lint` → exit 0, no warnings |
 | App Router + `src/` directory | ✅ Implemented | Confirmed in file tree |
 | `.env.example` with blank Supabase keys | ✅ Implemented | File present; not checked into Git with secrets |
