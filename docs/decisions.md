@@ -20,6 +20,25 @@
 **Decision:** Supabase for auth and PostgreSQL.  
 **Rationale:** Provides auth, row-level security, and a managed Postgres database in one service. Keys are blank in `.env.example`; no connection is made in Day 1.
 
+### Build toolchain workaround: Webpack for production build
+**Decision:** Configure `"build": "next build --webpack"` in `package.json`. Keep `"dev": "next dev"` unchanged.  
+**Rationale & exact error:** In this Windows execution environment, default `next build` (Turbopack) fails fatally during page endpoint write:
+```
+TurbopackInternalError: Failed to write app endpoint /page
+Caused by:
+- [project]/src/app/globals.css.css [app-client] (css)
+- creating new process
+- node process exited before we could connect to it with exit code: 0
+```
+Deleting `.next/` and retrying a clean build reproduced the identical failure. Invoking `next build --webpack` compiles successfully, executes TypeScript typechecking, and prerenders all static pages with exit code 0. This is documented strictly as a local build workaround; the underlying Turbopack process-spawning issue is not claimed to be fixed.
+
+### Contrast: Charcoal text on Sage background
+**Decision:** Use charcoal (`#2D2D2D`) text on sage (`#7C9A6B`) interactive buttons and links.  
+**Rationale:** WCAG 2.1 AA requires a minimum contrast ratio of 4.5:1 for normal text (under 18pt / 24px regular or 14pt / 18.66px bold). White (`#FFFFFF`) on sage (`#7C9A6B`) yields only 3.14:1, failing the threshold. Charcoal (`#2D2D2D`) on sage yields 4.39:1 (substantially higher readability).
+
+### Commit verification sequencing note
+**Decision:** Record that initial checkpoint commit `a461aec` was created before production build execution was verified in this environment. The production build failure was caught upon resuming the session and stabilized in commit `fix: stabilize production build and verify Day 1`.
+
 ---
 
 ## Scope decisions

@@ -6,8 +6,11 @@ export default function Home() {
       {/* Skip-to-content link for keyboard users */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold focus:text-white"
-        style={{ backgroundColor: "var(--color-sage)" }}
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold"
+        style={{
+          backgroundColor: "var(--color-sage)",
+          color: "var(--color-charcoal)",
+        }}
       >
         Skip to main content
       </a>
@@ -74,9 +77,11 @@ export default function Home() {
           {/* CTA anchor — links to the section below, no fake sign-in */}
           <a
             href="#how-it-works"
-            className="inline-block rounded-full px-8 py-3 text-base font-semibold text-white transition-colors"
-            style={{ backgroundColor: "var(--color-sage)" }}
-            /* Hover handled by Tailwind utility below */
+            className="inline-block rounded-full px-8 py-3 text-base font-semibold transition-colors"
+            style={{
+              backgroundColor: "var(--color-sage)",
+              color: "var(--color-charcoal)",
+            }}
           >
             How LOOP works
           </a>

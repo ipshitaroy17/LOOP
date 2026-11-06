@@ -10,7 +10,7 @@ Last updated: Day 1 — project foundation
 
 | Item | Status | Validation |
 |------|--------|------------|
-| Next.js 16.4.5 project scaffolded | ✅ Implemented | `npm run build` → exit 0 |
+| Next.js 16.4.5 project scaffolded | ✅ Implemented | `npm run build` → exit 0 (using `--webpack` workaround; see `docs/decisions.md`). *Note: Initial commit `a461aec` was recorded prior to verifying the production build.* |
 | TypeScript configured (`@/*` alias) | ✅ Implemented | `npm run typecheck` → exit 0 |
 | Tailwind CSS v4 (`globals.css` tokens) | ✅ Implemented | `npm run build` compiled without CSS errors |
 | ESLint configured | ✅ Implemented | `npm run lint` → exit 0, no warnings |
@@ -34,12 +34,13 @@ Last updated: Day 1 — project foundation
 | "How LOOP works" anchor link | ✅ Implemented | `href="#how-it-works"` in nav and hero CTA |
 | Warm cream background | ✅ Implemented | `--color-cream: #FAF7F0` in `globals.css` |
 | Sage primary accent | ✅ Implemented | `--color-sage: #7C9A6B`; used for tagline and CTA |
+| Button text contrast on Sage | ✅ Implemented | Charcoal (`#2D2D2D`) on Sage (`#7C9A6B`) yields 4.39:1 contrast (WCAG compliant); white failed at 3.14:1 |
 | Restrained pink accent | ✅ Implemented | `--color-pink: #E8B4B8`; used for Follow card chip |
 | Butter yellow accent | ✅ Implemented | `--color-butter: #F5D87E`; used for Watch card chip |
 | Lilac accent | ✅ Implemented | `--color-lilac: #C3B1D4`; used for Read card chip |
 | Charcoal body text | ✅ Implemented | `--color-charcoal: #2D2D2D` |
 | System font stack | ✅ Implemented | `system-ui, -apple-system, ...` in `--font-sans`; no external CDN |
-| Skip-to-content link (keyboard) | ✅ Implemented | `<a href="#main-content" class="sr-only focus:not-sr-only ...">` |
+| Skip-to-content link (keyboard) | ✅ Implemented | `<a href="#main-content" class="sr-only focus:not-sr-only ...">` with charcoal text |
 | Visible keyboard focus ring | ✅ Implemented | `:focus-visible` rule in `globals.css` with 3px sage outline |
 | Reduced-motion support | ✅ Implemented | `@media (prefers-reduced-motion: reduce)` in `globals.css` |
 | Rounded controls | ✅ Implemented | `rounded-full` on CTA button and icon chips |
@@ -52,36 +53,42 @@ Last updated: Day 1 — project foundation
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| 375px mobile layout | ⚠️ Not run | No browser tool available. Manual check instructions below. |
-| 1280px desktop layout | ⚠️ Not run | No browser tool available. Manual check instructions below. |
-| Tab-key keyboard focus on all interactive elements | ⚠️ Not run | Manual check instructions below. |
-| "How LOOP works" anchor navigates correctly | ⚠️ Not run | HTML confirms `id="how-it-works"` and matching `href="#how-it-works"`. |
+| 375px mobile layout | ❌ NOT RUN | No browser automation tool (Puppeteer/Playwright) is installed in the workspace environment. Manual verification required. |
+| 1280px desktop layout | ❌ NOT RUN | No browser automation tool installed in the workspace environment. Manual verification required. |
+| Tab-key keyboard focus on all interactive elements | ❌ NOT RUN | Requires interactive client runtime with keyboard event synthesis. Manual verification required. |
+| Skip-to-content link navigation | ❌ NOT RUN | Requires interactive browser DOM. Manual verification required. |
+| "How LOOP works" anchor navigates correctly | ❌ NOT RUN | HTML contains `id="how-it-works"` and matching `href="#how-it-works"`, but smooth scroll action requires browser runtime. |
+| Reduced-motion media query respected | ❌ NOT RUN | Requires OS/browser media feature toggle in real client. Manual verification required. |
 
-### Manual browser checklist
+### Exact manual browser verification steps
 
-Run `npm run dev` and open http://localhost:3000 in your browser.
+Start the production server:
+```bash
+npm run start
+```
+Open [http://localhost:3000](http://localhost:3000) in Chrome/Firefox/Safari.
 
-**375px (mobile):**
-- [ ] Open DevTools → toggle device toolbar → set width to 375.
-- [ ] Wordmark and tagline are readable, not clipped.
-- [ ] The three learning-mode cards stack vertically (single column).
-- [ ] The sage CTA button is fully visible.
-- [ ] Footer note is readable.
-
-**1280px (desktop):**
-- [ ] Three learning-mode cards appear side by side (3-column grid).
-- [ ] No horizontal scrollbar appears.
-- [ ] Text sizes feel comfortable.
-
-**Tab-key focus:**
-- [ ] Press Tab from the top of the page. The skip-to-content link becomes visible.
-- [ ] Press Tab again. The "How LOOP works" nav link receives a visible sage focus ring.
-- [ ] Press Tab again. The hero "How LOOP works" CTA button receives a visible sage focus ring.
-- [ ] No other interactive elements remain. Focus cycles correctly.
-
-**Anchor check:**
-- [ ] Click "How LOOP works" (nav or hero button). Page scrolls to the three-mode section smoothly (or instantly with reduced-motion).
-- [ ] The URL updates to `/#how-it-works`.
+1. **Mobile view (375px):**
+   - Press F12 (DevTools) → Toggle Device Toolbar (Ctrl+Shift+M / Cmd+Shift+M).
+   - Set dimensions to 375 × 667 (e.g., iPhone SE).
+   - Verify wordmark "LOOP" and tagline "Learn it. Loop it. Make it." are visible and not clipped.
+   - Verify the 3 learning cards (Watch, Read, Follow) stack vertically in 1 column.
+   - Verify no horizontal scrollbar appears.
+2. **Desktop view (1280px):**
+   - Set viewport width to 1280px or maximize window.
+   - Verify the 3 cards display side-by-side in a 3-column grid (`sm:grid-cols-3`).
+   - Check margins and typography.
+3. **Keyboard Tab navigation:**
+   - Click into the browser address bar and press `Tab`.
+   - Verify the "Skip to main content" button appears at top-left with charcoal text on sage background and outline.
+   - Press `Enter`: confirm focus jumps to `<main id="main-content">`.
+   - Press `Tab` again: verify focus moves to "How LOOP works" nav link with a 3px sage focus ring.
+   - Press `Tab` again: verify focus moves to the hero CTA button "How LOOP works" with a 3px sage focus ring.
+4. **Anchor navigation:**
+   - Click "How LOOP works" (either in nav or hero): page smoothly scrolls to section `#how-it-works`.
+5. **Reduced motion:**
+   - Enable "prefers-reduced-motion: reduce" in DevTools (Rendering drawer → Emulate CSS media feature `prefers-reduced-motion`).
+   - Click "How LOOP works" anchor: scroll jumps instantly instead of animating smoothly.
 
 ---
 
