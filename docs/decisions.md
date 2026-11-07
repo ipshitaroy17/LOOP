@@ -16,9 +16,15 @@
 **Decision:** `system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", ...` — no external font CDN.  
 **Rationale:** The sandbox environment has no outbound network access. Any web font loaded from Google Fonts or another CDN would silently fail or cause build warnings. System fonts are universally available, load instantly, are WCAG-accessible, and look clean on all major operating systems. This decision should be revisited before the core release to test whether Geist or another web font can load reliably in the production environment.
 
-### Database: Supabase (planned)
-**Decision:** Supabase for auth and PostgreSQL.  
-**Rationale:** Provides auth, row-level security, and a managed Postgres database in one service. Keys are blank in `.env.example`; no connection is made in Day 1.
+### Database: Supabase Integration (Day 2)
+**Decision:** Use Supabase PostgreSQL with `@supabase/ssr` and `@supabase/supabase-js`.  
+**Architecture & Security Decisions:**
+- **Client Separation:** Browser client (`src/lib/supabase/client.ts`) and Server client (`src/lib/supabase/server.ts`) are separated. Server client uses Next.js 15+ asynchronous `cookies()` from `next/headers` with `getAll()` and `setAll()` methods.
+- **Publishable Key Only:** All browser and public server calls use `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`). No service-role key or secret keys are introduced into client-facing code.
+- **Graceful Unconfigured Degradation:** Environment configuration is read and validated lazily via `src/lib/supabase/config.ts`. If `.env.local` is missing or contains placeholders, the public landing page continues to build and serve without runtime exceptions.
+- **Row Level Security (RLS):** Every public table has RLS enabled with explicit `USING` and `WITH CHECK` clauses preventing user ID spoofing or ownership transfer. Public table grants are revoked and restricted to needed verbs (e.g. `SELECT` only on `projects`).
+- **Provisional Step Modeling:** Step progress in `learning_progress` uses string identifier arrays (`completed_step_identifiers text[]`) until dedicated `pattern_steps` relational tables are built in subsequent milestones.
+- **Automatic Profile Provisioning:** A `security definer` trigger `handle_new_user()` on `auth.users` creates an initial profile record on signup, with a fixed `search_path = public, auth, pg_temp` to prevent search path hijacking.
 
 ### Build toolchain: Turbopack for production build and development
 **Decision:** Configure standard `"build": "next build"` in `package.json`.  

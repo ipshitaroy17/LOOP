@@ -93,6 +93,24 @@ Open [http://localhost:3000](http://localhost:3000) in Chrome/Firefox/Safari.
 
 ---
 
+## Supabase & Database Foundation (Day 2)
+
+| Item | Status | Validation |
+|------|--------|------------|
+| `@supabase/ssr` & `@supabase/supabase-js` dependencies | ✅ Implemented | Installed in `package.json` |
+| Browser Client (`src/lib/supabase/client.ts`) | ✅ Implemented | Uses `createBrowserClient` with type definitions |
+| Server Client (`src/lib/supabase/server.ts`) | ✅ Implemented | Uses `createServerClient` with asynchronous cookies (`next/headers`) |
+| Environment configuration & graceful degradation | ✅ Implemented | Lazy evaluation in `src/lib/supabase/config.ts`; landing page unaffected |
+| Initial Schema Migration (`20261107000000_initial_schema.sql`) | ✅ Implemented | Authored with `profiles`, `projects`, `user_projects`, `learning_progress` |
+| RLS Policies & Grants defined | ✅ Implemented | Strict owner isolation, catalogue read-only for public, grants restricted |
+| Auth-user Profile Creation Trigger | ✅ Implemented | `handle_new_user()` security-definer function on `auth.users` |
+| Development Connection Health Check | ✅ Implemented | Verified via `npm run check:supabase` (safe missing-config reporting) and `/api/health/supabase` |
+| Repeatable RLS SQL Test Suite (`rls_verification.sql`) | ✅ Implemented | Authored with transaction rollback and 8-point permission checks |
+| Migration applied to user Supabase project | ⏳ Pending | Awaiting user execution in Supabase Dashboard SQL Editor |
+| Real database connection verification | ⏳ Pending | Awaiting user `.env.local` credentials |
+
+---
+
 ## Documentation
 
 | Item | Status |
@@ -104,12 +122,11 @@ Open [http://localhost:3000](http://localhost:3000) in Chrome/Firefox/Safari.
 
 ---
 
-## Not started (Day 2+)
+## Next Milestones (Day 3+)
 
 | Feature | Status |
 |---------|--------|
-| Supabase client setup | 📋 Planned |
-| Authentication (sign up / sign in) | 📋 Planned |
+| Authentication UI & flows (sign up / sign in / sign out) | 📋 Planned |
 | Onboarding flow | 📋 Planned |
 | Projects listing page | 📋 Planned |
 | Written pattern view | 📋 Planned |
