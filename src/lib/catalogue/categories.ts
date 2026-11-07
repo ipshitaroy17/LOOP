@@ -70,3 +70,4 @@ export function sanitizeDifficultyFilter(value?: string | null): string | undefi
   const exists = CATALOGUE_DIFFICULTIES.some((d) => d.id === value && d.id !== 'all');
   return exists ? value : undefined;
 }
+

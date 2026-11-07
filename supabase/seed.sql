@@ -4,9 +4,9 @@
 -- Entity: public.projects (6 starter project previews)
 --
 -- Safety Guarantees:
--- 1. Idempotent: Uses ON CONFLICT (slug) DO UPDATE.
+-- 1. Idempotent: Uses ON CONFLICT (slug) DO NOTHING (rerunning will not overwrite manual edits).
 -- 2. Non-destructive: Does NOT delete or truncate existing rows.
--- 3. Isolated: Only inserts/updates these 6 specific starter slugs.
+-- 3. Isolated: Only inserts these 6 specific starter slugs if they do not already exist.
 -- 4. Schema-safe: Ensures columns exist before inserting.
 -- ============================================================================
 
@@ -16,7 +16,9 @@ alter table public.projects
   add column if not exists materials text[] not null default '{}'::text[],
   add column if not exists skills text[] not null default '{}'::text[];
 
--- Insert or update the 6 starter project previews
+-- Insert the 6 starter project previews.
+-- Uses ON CONFLICT (slug) DO NOTHING so that re-running this seed script will
+-- NOT overwrite any manually edited titles, descriptions, materials, or thumbnails.
 insert into public.projects (
   slug,
   title,
@@ -175,15 +177,5 @@ values
   '/illustrations/projects/mini-drawstring-pouch.svg',
   true
 )
-on conflict (slug) do update set
-  title = excluded.title,
-  description = excluded.description,
-  category = excluded.category,
-  difficulty = excluded.difficulty,
-  estimated_minutes = excluded.estimated_minutes,
-  estimated_duration = excluded.estimated_duration,
-  materials = excluded.materials,
-  skills = excluded.skills,
-  thumbnail_url = excluded.thumbnail_url,
-  published = excluded.published,
-  updated_at = now();
+on conflict (slug) do nothing;
+

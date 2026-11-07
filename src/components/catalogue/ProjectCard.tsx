@@ -152,3 +152,4 @@ export default function ProjectCard({ project, priority = false }: ProjectCardPr
     </article>
   );
 }
+

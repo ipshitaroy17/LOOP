@@ -38,3 +38,4 @@ export interface RecommendationResult {
   projects: Project[];
   reason: string;
 }
+

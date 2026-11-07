@@ -18,3 +18,4 @@ comment on column public.projects.skills is 'Key crochet techniques and stitch a
 -- 3. Add index on category and difficulty for performant exploration
 create index if not exists idx_projects_category on public.projects(category);
 create index if not exists idx_projects_difficulty on public.projects(difficulty);
+

@@ -168,15 +168,5 @@ values
   '/illustrations/projects/mini-drawstring-pouch.svg',
   true
 )
-on conflict (slug) do update set
-  title = excluded.title,
-  description = excluded.description,
-  category = excluded.category,
-  difficulty = excluded.difficulty,
-  estimated_minutes = excluded.estimated_minutes,
-  estimated_duration = excluded.estimated_duration,
-  materials = excluded.materials,
-  skills = excluded.skills,
-  thumbnail_url = excluded.thumbnail_url,
-  published = excluded.published,
-  updated_at = now();
+on conflict (slug) do nothing;
+

@@ -8,3 +8,4 @@ export function sanitizeSearchQuery(input?: string | null): string {
     .replace(/[%_]/g, '\\$&') // escape SQL wildcards
     .slice(0, 80); // enforce sensible length limit
 }
+
