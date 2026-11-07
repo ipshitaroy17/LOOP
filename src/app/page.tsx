@@ -56,6 +56,13 @@ export default function Home() {
         </span>
 
         <nav aria-label="Page navigation" className="flex items-center gap-2 sm:gap-4">
+          <Link
+            href="/explore"
+            className="text-sm font-medium rounded-md px-3 py-2 transition-colors hover:underline"
+            style={{ color: "var(--color-charcoal)" }}
+          >
+            Explore
+          </Link>
           <a
             href="#how-it-works"
             className="text-sm font-medium rounded-md px-3 py-2 transition-colors hidden sm:inline"
@@ -150,7 +157,7 @@ export default function Home() {
                 color: "var(--color-charcoal)",
               }}
             >
-              Day 4 — personalized onboarding
+              Day 5 — project catalogue &amp; discovery
             </span>
           </p>
         </footer>

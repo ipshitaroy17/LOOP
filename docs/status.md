@@ -142,6 +142,48 @@ Open [http://localhost:3000](http://localhost:3000) in Chrome/Firefox/Safari.
 
 ---
 
+## Project Catalogue, Search & Discovery (Day 5)
+
+| Item | Status | Validation |
+|------|--------|------------|
+| Database Schema Extension (`20261107000001_project_details.sql`) | ✅ Implemented | Added `estimated_minutes` (integer), `materials` (`text[]`), and `skills` (`text[]`) with indexes on `category` and `difficulty`. |
+| Starter Catalogue Seed (`supabase/seed.sql`) | ✅ Prepared | 6 original project previews: Beginner Practice Square, Simple Square Coaster, Classic Granny Square, Sweet Blossom Flower, Heart Keychain, Mini Drawstring Pouch. Idempotent (`ON CONFLICT (slug) DO UPDATE`), non-destructive. |
+| Original Project Illustrations | ✅ Implemented | 6 custom vector illustrations + 1 placeholder in `public/illustrations/projects/`, designed in LOOP's warm cream/sage/charcoal palette. |
+| Explore Page (`/explore`) | ✅ Implemented | Responsive project grid, search by title/description, category and difficulty filters, "Tutorial coming soon" badges, result counter. |
+| Search & Filter URL State Sync | ✅ Implemented | Query parameters `q`, `category`, and `difficulty` sync to URL; preserved on refresh and browser Back/Forward navigation. |
+| Safe Search Punctuation | ✅ Implemented | Wildcard characters `%` and `_` are escaped; sensible length limit enforced. |
+| Project Detail Page (`/projects/[slug]`) | ✅ Implemented | Shows illustration, description, category, difficulty, estimated duration, materials list, skills tags, and "Tutorial coming soon" notice. |
+| 404 Not Found Handling | ✅ Implemented | Unknown or unpublished slugs invoke Next.js `notFound()`, showing custom `ProjectNotFound` component without exposing draft rows. |
+| Deterministic Discovery Engine | ✅ Implemented | `rankProjectsForUser()` scores projects by matching onboarding interests and skill level; breaks ties deterministically; falls back gracefully when preferences are skipped without claiming false personalization. |
+| Dashboard Recommendations Section | ✅ Implemented | Authenticated `/dashboard` showcases top 3 suggested or browse projects with direct links to Explore. |
+| Navigation Links | ✅ Implemented | Added "Explore" link across landing page header, dashboard navigation, and project breadcrumbs. |
+| Unit Test Suite | ✅ Passed | 7/7 tests passed: recommendation scoring, interest alignment, skipped answer fallback, and query sanitization. |
+
+### Starter Catalogue Limitations & Preview Rules
+- Starter projects are published strictly as previews labelled with "Tutorial coming soon".
+- No non-functional buttons or placeholders for unbuilt features (video player, written-pattern download, step-by-step progress, AI tutor).
+- Descriptions provide genuine guidance and estimated times without implying completed lessons exist.
+
+### Category Mappings & Recommendation Rules
+- **Category Compatibility**:
+  - `home-decor` ↔ Q4 interest `home-decor`
+  - `flowers` ↔ Q4 interest `flowers`
+  - `keychains` ↔ Q4 interest `keychains`
+  - `accessories` ↔ Q4 interest `accessories`
+  - `bags` ↔ Q4 interest `bags`
+  - Special `gifts` interest grants a bonus to giftable items (`keychains`, `flowers`, `accessories`).
+- **Difficulty Alignment**:
+  - `beginner`: boosts `beginner` (+5) and `easy` (+3) projects.
+  - `intermediate`: boosts `intermediate` (+5) and `easy` (+4) projects.
+  - `advanced`: boosts `advanced` (+5) and `intermediate` (+4) projects.
+- **Tie-breaking**: Deterministic ascending sort on `project.slug`.
+- **Session Time**: Explicitly decoupled from project duration per specifications.
+
+### Manual SQL Seed Step (for Supabase SQL Editor)
+Execute `supabase/seed.sql` in your Supabase SQL Editor (or Dashboard -> SQL Editor) to insert the 6 starter projects. The script is idempotent and safe to run multiple times without deleting existing rows.
+
+---
+
 ## Documentation
 
 | Item | Status |
@@ -153,20 +195,14 @@ Open [http://localhost:3000](http://localhost:3000) in Chrome/Firefox/Safari.
 
 ---
 
-## Next Milestones (Day 5+)
+## Next Milestones (Day 6+)
 
 | Feature | Status |
 |---------|--------|
-| Projects listing & catalogue browsing | 📋 Planned |
 | Written pattern view | 📋 Planned |
 | Guided steps view | 📋 Planned |
 | Video player (embedded) | 📋 Planned |
 | Step-by-step progress tracking | 📋 Planned |
+| User saved projects (`user_projects`) | 📋 Planned |
 | AI crochet tutor | 📋 Planned |
-| Image upload / image-to-pattern | 📋 Planned (post-core) |
-| Written pattern view | 📋 Planned |
-| Guided steps view | 📋 Planned |
-| Video player (embedded) | 📋 Planned |
-| Progress tracking | 📋 Planned |
-| AI tutor | 📋 Planned |
 | Image upload / image-to-pattern | 📋 Planned (post-core) |

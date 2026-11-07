@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" role="img" aria-labelledby="desc-sq">
+  <!-- LOOP Original Vector Illustration: Beginner Practice Square -->
+  <!-- Designed for LOOP Crochet Learning Platform | Palette: Cream #FAF7F0, Sage #7C9A6B, Charcoal #2D2D2D -->
+  <title id="desc-sq">Illustration of a single crochet beginner practice swatch</title>
+  <rect width="320" height="240" rx="16" fill="#F4EFE6"/>
+  
+  <!-- Shadow -->
+  <rect x="76" y="56" width="168" height="136" rx="12" fill="#2D2D2D" fill-opacity="0.06"/>
+  
+  <!-- Crochet Square Swatch -->
+  <rect x="72" y="50" width="168" height="136" rx="10" fill="#7C9A6B"/>
+  
+  <!-- Row Texture: Horizontal Stitch Lines -->
+  <g stroke="#FAF7F0" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 4" opacity="0.85">
+    <line x1="86" y1="68" x2="226" y2="68"/>
+    <line x1="86" y1="84" x2="226" y2="84"/>
+    <line x1="86" y1="100" x2="226" y2="100"/>
+    <line x1="86" y1="116" x2="226" y2="116"/>
+    <line x1="86" y1="132" x2="226" y2="132"/>
+    <line x1="86" y1="148" x2="226" y2="148"/>
+    <line x1="86" y1="164" x2="226" y2="164"/>
+  </g>
+  
+  <!-- Crochet Hook Accent -->
+  <g transform="rotate(-35 240 70)">
+    <rect x="220" y="60" width="10" height="90" rx="5" fill="#E8B4B8"/>
+    <path d="M225 60 C222 55 218 52 215 54 C213 56 215 62 219 62" stroke="#FAF7F0" stroke-width="3" stroke-linecap="round" fill="none"/>
+  </g>
+  
+  <!-- Working Yarn Tail -->
+  <path d="M228 172 Q250 185 260 170 T280 185" stroke="#7C9A6B" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"/>
+</svg>

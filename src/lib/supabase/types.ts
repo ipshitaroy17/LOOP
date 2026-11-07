@@ -54,6 +54,9 @@ export interface Database {
           difficulty: ProjectDifficulty;
           thumbnail_url: string | null;
           estimated_duration: string | null;
+          estimated_minutes: number | null;
+          materials: string[];
+          skills: string[];
           published: boolean;
           created_at: string;
           updated_at: string;
@@ -67,6 +70,9 @@ export interface Database {
           difficulty: ProjectDifficulty;
           thumbnail_url?: string | null;
           estimated_duration?: string | null;
+          estimated_minutes?: number | null;
+          materials?: string[];
+          skills?: string[];
           published?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -80,6 +86,9 @@ export interface Database {
           difficulty?: ProjectDifficulty;
           thumbnail_url?: string | null;
           estimated_duration?: string | null;
+          estimated_minutes?: number | null;
+          materials?: string[];
+          skills?: string[];
           published?: boolean;
           created_at?: string;
           updated_at?: string;

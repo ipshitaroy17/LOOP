@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import Link from 'next/link';
 import type { OnboardingPreferences, MultipleAnswer, SingleAnswer } from '@/lib/onboarding/types';
+import SuggestedProjects from '@/components/catalogue/SuggestedProjects';
+import { getPublishedProjects } from '@/lib/catalogue/queries';
 
 // Allow blocking route for runtime cookies authentication
 export const instant = false;
@@ -55,6 +57,9 @@ export default async function DashboardPage() {
   const preferences = (profile?.onboarding_preferences as unknown as OnboardingPreferences) || null;
   const answers = preferences?.answers || {};
 
+  // Fetch published catalogue projects for discovery suggestions
+  const catalogueResult = await getPublishedProjects({}, 20);
+
   // 1. Experience Level
   let experienceLabel = 'Not specified';
   if (profile?.experience_level === 'beginner') experienceLabel = 'Complete beginner';
@@ -102,6 +107,14 @@ export default async function DashboardPage() {
         </Link>
 
         <nav aria-label="Dashboard navigation" className="flex items-center gap-4">
+          <Link
+            href="/explore"
+            className="text-sm font-semibold px-4 py-2 rounded-full border border-black/10 transition-colors hover:bg-black/5"
+            style={{ color: 'var(--color-charcoal)' }}
+          >
+            Explore projects
+          </Link>
+
           <span
             className="text-sm font-medium hidden sm:inline"
             style={{ color: 'var(--color-charcoal-soft)' }}
@@ -140,6 +153,13 @@ export default async function DashboardPage() {
             Your learning profile is set up and saved to Supabase.
           </p>
         </section>
+
+        {/* Personalized Project Discovery */}
+        <SuggestedProjects
+          allProjects={catalogueResult.projects}
+          preferences={preferences}
+          experienceLevel={profile?.experience_level}
+        />
 
         {/* Learning Preferences Summary Card */}
         <section
