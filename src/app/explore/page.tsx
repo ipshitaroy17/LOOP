@@ -6,6 +6,7 @@ import ExploreFilters from '@/components/catalogue/ExploreFilters';
 import ProjectGrid from '@/components/catalogue/ProjectGrid';
 import { getPublishedProjects } from '@/lib/catalogue/queries';
 import { sanitizeCategoryFilter, sanitizeDifficultyFilter } from '@/lib/catalogue/categories';
+import { getUserSavedProjectIds } from '@/lib/catalogue/saved-projects';
 
 // Allow blocking route for request-time searchParams in Next.js 16
 export const instant = false;
@@ -55,11 +56,16 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     difficulty
   );
 
-  const queryResult = await getPublishedProjects({
-    search: rawSearch,
-    category,
-    difficulty,
-  });
+  const [queryResult, savedProjectIdsSet] = await Promise.all([
+    getPublishedProjects({
+      search: rawSearch,
+      category,
+      difficulty,
+    }),
+    getUserSavedProjectIds(),
+  ]);
+
+  const savedProjectIds = Array.from(savedProjectIdsSet);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-cream)' }}>
@@ -138,6 +144,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
           projects={queryResult.projects}
           error={queryResult.error}
           hasActiveFilters={hasActiveFilters}
+          savedProjectIds={savedProjectIds}
         />
       </main>
 

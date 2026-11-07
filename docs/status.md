@@ -184,6 +184,23 @@ Execute `supabase/seed.sql` in your Supabase SQL Editor (or Dashboard -> SQL Edi
 
 ---
 
+## Save Projects & My Projects (Day 6)
+
+| Item | Status | Validation |
+|------|--------|------------|
+| Save / Saved Control Component (`SaveButton.tsx`) | ✅ Implemented | Functional Save / Saved toggle on Explore cards and project detail pages. Stamped with `e.stopPropagation()` and `e.preventDefault()` to prevent triggering card navigation. |
+| In-flight Duplicate Prevention | ✅ Implemented | Controlled button with `isPending` state; ignores repeated clicks while save/remove action is in flight. |
+| User Session Persistence | ✅ Implemented | Persists to `public.user_projects` under authenticated `user_id`. Restored on page refresh and preserved across logins. |
+| Signed-out User Redirection | ✅ Implemented | Clicking Save when unauthenticated seamlessly redirects to `/login?redirect=...`. |
+| My Projects Page (`/my-projects`) | ✅ Implemented | Protected App Router route displaying user's saved projects with loading, error/retry, and empty states. |
+| Empty State Handling | ✅ Implemented | Renders "No saved projects yet" with direct action link to `/explore`. |
+| Data Model & Progress Safeguards | ✅ Implemented | Reuses `public.user_projects`. Removal only deletes records where `status = 'saved'`. Active progress (`in_progress`, `completed`) is protected from accidental deletion or downgrade. |
+| RLS & User Isolation | ✅ Verified | Uses existing Day 2 RLS policies on `user_projects` (`auth.uid() = user_id`). No service-role key exposed in client code. |
+| Navigation Integration | ✅ Implemented | "My Projects" navigation link added to Header (`AuthNav`), Dashboard, and Explore page for authenticated users. |
+| Production Build Verification | ✅ Passed | All 14 routes compiled and generated statically / dynamically with exit code 0 (`next build --webpack`). |
+
+---
+
 ## Documentation
 
 | Item | Status |
@@ -195,7 +212,7 @@ Execute `supabase/seed.sql` in your Supabase SQL Editor (or Dashboard -> SQL Edi
 
 ---
 
-## Next Milestones (Day 6+)
+## Next Milestones (Day 7+)
 
 | Feature | Status |
 |---------|--------|
@@ -203,6 +220,5 @@ Execute `supabase/seed.sql` in your Supabase SQL Editor (or Dashboard -> SQL Edi
 | Guided steps view | 📋 Planned |
 | Video player (embedded) | 📋 Planned |
 | Step-by-step progress tracking | 📋 Planned |
-| User saved projects (`user_projects`) | 📋 Planned |
 | AI crochet tutor | 📋 Planned |
 | Image upload / image-to-pattern | 📋 Planned (post-core) |

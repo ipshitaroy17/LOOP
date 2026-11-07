@@ -6,6 +6,8 @@ import { connection } from 'next/server';
 import AuthNav from '@/components/AuthNav';
 import { getProjectBySlug } from '@/lib/catalogue/queries';
 import { getCategoryLabel, getDifficultyLabel } from '@/lib/catalogue/categories';
+import { isProjectSavedByUser } from '@/lib/catalogue/saved-projects';
+import SaveButton from '@/components/catalogue/SaveButton';
 
 export const instant = false;
 
@@ -47,6 +49,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   if (!project || !project.published) {
     notFound();
   }
+
+  const isSaved = await isProjectSavedByUser(project.id);
 
   const difficultyColor = (() => {
     switch (project.difficulty) {
@@ -185,6 +189,16 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   {project.description}
                 </p>
               )}
+
+              {/* Save Project Button */}
+              <div className="mb-6">
+                <SaveButton
+                  projectId={project.id}
+                  initialIsSaved={isSaved}
+                  projectTitle={project.title}
+                  variant="detail"
+                />
+              </div>
             </div>
 
             {/* Preview Banner: Explains tutorial status without fake CTA buttons */}

@@ -5,13 +5,19 @@ import Image from 'next/image';
 import { useState } from 'react';
 import type { Project } from '@/lib/catalogue/types';
 import { getCategoryLabel, getDifficultyLabel } from '@/lib/catalogue/categories';
+import SaveButton from './SaveButton';
 
 interface ProjectCardProps {
   project: Project;
   priority?: boolean;
+  initialIsSaved?: boolean;
 }
 
-export default function ProjectCard({ project, priority = false }: ProjectCardProps) {
+export default function ProjectCard({
+  project,
+  priority = false,
+  initialIsSaved = false,
+}: ProjectCardProps) {
   const [imgSrc, setImgSrc] = useState(
     project.thumbnail_url || '/illustrations/projects/project-placeholder.svg'
   );
@@ -51,6 +57,16 @@ export default function ProjectCard({ project, priority = false }: ProjectCardPr
               setImgSrc('/illustrations/projects/project-placeholder.svg');
             }}
           />
+
+          {/* Save / Bookmark Button */}
+          <div className="absolute top-3 left-3 z-10">
+            <SaveButton
+              projectId={project.id}
+              initialIsSaved={initialIsSaved}
+              projectTitle={project.title}
+              variant="card"
+            />
+          </div>
 
           {/* Tutorial Coming Soon Badge */}
           <div className="absolute top-3 right-3">

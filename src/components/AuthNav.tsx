@@ -17,7 +17,14 @@ export default async function AuthNav() {
 
   if (user) {
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <Link
+          href="/my-projects"
+          className="text-sm font-medium rounded-full px-3.5 py-2 transition-colors hover:bg-black/5 hidden xs:inline"
+          style={{ color: 'var(--color-charcoal)' }}
+        >
+          My Projects
+        </Link>
         <Link
           href="/dashboard"
           className="text-sm font-medium rounded-full px-4 py-2 transition-colors hover:brightness-105"

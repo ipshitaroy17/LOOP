@@ -8,12 +8,14 @@ interface ProjectGridProps {
   projects: Project[];
   error?: string | null;
   hasActiveFilters?: boolean;
+  savedProjectIds?: string[];
 }
 
 export default function ProjectGrid({
   projects,
   error,
   hasActiveFilters = false,
+  savedProjectIds = [],
 }: ProjectGridProps) {
   // 1. Error state with retry
   if (error) {
@@ -127,7 +129,12 @@ export default function ProjectGrid({
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
     >
       {projects.map((project, idx) => (
-        <ProjectCard key={project.id} project={project} priority={idx < 3} />
+        <ProjectCard
+          key={project.id}
+          project={project}
+          priority={idx < 3}
+          initialIsSaved={savedProjectIds.includes(project.id)}
+        />
       ))}
     </div>
   );

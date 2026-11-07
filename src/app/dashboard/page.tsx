@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { OnboardingPreferences, MultipleAnswer, SingleAnswer } from '@/lib/onboarding/types';
 import SuggestedProjects from '@/components/catalogue/SuggestedProjects';
 import { getPublishedProjects } from '@/lib/catalogue/queries';
+import { getUserSavedProjectIds } from '@/lib/catalogue/saved-projects';
 
 // Allow blocking route for runtime cookies authentication
 export const instant = false;
@@ -58,7 +59,12 @@ export default async function DashboardPage() {
   const answers = preferences?.answers || {};
 
   // Fetch published catalogue projects for discovery suggestions
-  const catalogueResult = await getPublishedProjects({}, 20);
+  // and user's saved project IDs to accurately reflect saved state
+  const [catalogueResult, savedProjectIdsSet] = await Promise.all([
+    getPublishedProjects({}, 20),
+    getUserSavedProjectIds(),
+  ]);
+  const savedProjectIds = Array.from(savedProjectIdsSet);
 
   // 1. Experience Level
   let experienceLabel = 'Not specified';
@@ -106,7 +112,14 @@ export default async function DashboardPage() {
           LOOP
         </Link>
 
-        <nav aria-label="Dashboard navigation" className="flex items-center gap-4">
+        <nav aria-label="Dashboard navigation" className="flex items-center gap-3">
+          <Link
+            href="/my-projects"
+            className="text-sm font-semibold px-4 py-2 rounded-full border border-black/10 transition-colors hover:bg-black/5"
+            style={{ color: 'var(--color-charcoal)' }}
+          >
+            My Projects
+          </Link>
           <Link
             href="/explore"
             className="text-sm font-semibold px-4 py-2 rounded-full border border-black/10 transition-colors hover:bg-black/5"
@@ -159,6 +172,7 @@ export default async function DashboardPage() {
           allProjects={catalogueResult.projects}
           preferences={preferences}
           experienceLevel={profile?.experience_level}
+          savedProjectIds={savedProjectIds}
         />
 
         {/* Learning Preferences Summary Card */}

@@ -8,12 +8,14 @@ interface SuggestedProjectsProps {
   allProjects: Project[];
   preferences: OnboardingPreferences | null;
   experienceLevel?: string | null;
+  savedProjectIds?: string[];
 }
 
 export default function SuggestedProjects({
   allProjects,
   preferences,
   experienceLevel,
+  savedProjectIds = [],
 }: SuggestedProjectsProps) {
   const { isPersonalized, projects, reason } = rankProjectsForUser(
     allProjects,
@@ -64,7 +66,11 @@ export default function SuggestedProjects({
       {projects.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+            <ProjectCard
+              key={project.id}
+              project={project}
+              initialIsSaved={savedProjectIds.includes(project.id)}
+            />
           ))}
         </div>
       ) : (

@@ -51,8 +51,13 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // Protect /dashboard and /onboarding — redirect unauthenticated visitors to /login
-  if (!user && (pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding'))) {
+  // Protect /dashboard, /onboarding, and /my-projects — redirect unauthenticated visitors to /login
+  if (
+    !user &&
+    (pathname.startsWith('/dashboard') ||
+      pathname.startsWith('/onboarding') ||
+      pathname.startsWith('/my-projects'))
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirect', pathname);

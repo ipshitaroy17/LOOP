@@ -157,7 +157,7 @@ export default function Home() {
                 color: "var(--color-charcoal)",
               }}
             >
-              Day 5 — project catalogue &amp; discovery
+              Day 6 — save projects &amp; my projects
             </span>
           </p>
         </footer>
