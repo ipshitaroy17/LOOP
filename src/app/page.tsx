@@ -1,4 +1,31 @@
+import { Suspense } from "react";
+import Link from "next/link";
 import HowItWorks from "@/components/HowItWorks";
+import AuthNav from "@/components/AuthNav";
+
+function AuthNavFallback() {
+  return (
+    <div className="flex items-center gap-2 sm:gap-3">
+      <Link
+        href="/login"
+        className="text-sm font-medium rounded-md px-3 py-2 transition-colors hover:text-black"
+        style={{ color: "var(--color-charcoal)" }}
+      >
+        Log in
+      </Link>
+      <Link
+        href="/signup"
+        className="text-sm font-semibold rounded-full px-4 py-2 transition-colors hover:brightness-105"
+        style={{
+          backgroundColor: "var(--color-sage)",
+          color: "#1F1F1F",
+        }}
+      >
+        Sign up
+      </Link>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
@@ -28,14 +55,18 @@ export default function Home() {
           LOOP
         </span>
 
-        <nav aria-label="Page navigation">
+        <nav aria-label="Page navigation" className="flex items-center gap-2 sm:gap-4">
           <a
             href="#how-it-works"
-            className="text-sm font-medium rounded-md px-4 py-2 transition-colors"
+            className="text-sm font-medium rounded-md px-3 py-2 transition-colors hidden sm:inline"
             style={{ color: "var(--color-sage)" }}
           >
             How LOOP works
           </a>
+
+          <Suspense fallback={<AuthNavFallback />}>
+            <AuthNav />
+          </Suspense>
         </nav>
       </header>
 
@@ -74,17 +105,29 @@ export default function Home() {
             so you can learn at your pace, your way.
           </p>
 
-          {/* CTA anchor — links to the section below, no fake sign-in */}
-          <a
-            href="#how-it-works"
-            className="inline-block rounded-full px-8 py-3 text-base font-semibold transition-colors hover:brightness-105"
-            style={{
-              backgroundColor: "var(--color-sage)",
-              color: "#1F1F1F",
-            }}
-          >
-            How LOOP works
-          </a>
+          {/* CTA actions */}
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <a
+              href="#how-it-works"
+              className="inline-block rounded-full px-8 py-3 text-base font-semibold transition-colors hover:brightness-105"
+              style={{
+                backgroundColor: "var(--color-sage)",
+                color: "#1F1F1F",
+              }}
+            >
+              How LOOP works
+            </a>
+            <Link
+              href="/signup"
+              className="inline-block rounded-full px-8 py-3 text-base font-semibold border border-black/10 transition-colors hover:bg-black/5"
+              style={{
+                color: "var(--color-charcoal)",
+                backgroundColor: "var(--color-white)",
+              }}
+            >
+              Create free account
+            </Link>
+          </div>
         </section>
 
         {/* ── Three learning modes ─────────────────────────────────────── */}
@@ -107,7 +150,7 @@ export default function Home() {
                 color: "var(--color-charcoal)",
               }}
             >
-              Day 1 — foundation only
+              Day 3 — authentication
             </span>
           </p>
         </footer>

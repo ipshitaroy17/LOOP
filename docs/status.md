@@ -106,7 +106,22 @@ Open [http://localhost:3000](http://localhost:3000) in Chrome/Firefox/Safari.
 | Auth-user Profile Creation Trigger | ✅ Implemented | `handle_new_user()` security-definer function on `auth.users` with fixed `search_path` |
 | Development Connection Health Check | ✅ Implemented | CLI check script (`npm run check:supabase`) and `/api/health/supabase` endpoint |
 | Real database connection verification | ✅ Implemented | `npm run check:supabase` returned `[CONNECTED — EMPTY CATALOGUE]` (status 200, 0 published projects) |
-| Repeatable RLS SQL Test Suite (`rls_verification.sql`) | ⏳ Awaiting Run | Script corrected and ready. 12 checks in `BEGIN/ROLLBACK`; SELECT returns tabular results before rollback; failures reported in exception message. Awaiting user run. Live RLS verification **not yet confirmed**. |
+| Repeatable RLS SQL Test Suite (`rls_verification.sql`) | ⏳ Awaiting Run | Script corrected and ready. 12 checks in `BEGIN/ROLLBACK`; SELECT returns tabular results before rollback; failures reported in exception message. Awaiting user run in Supabase SQL Editor. Live RLS verification **not yet confirmed**. |
+
+---
+
+## Authentication & Sessions (Day 3)
+
+| Item | Status | Validation |
+|------|--------|------------|
+| Next.js 16 Proxy (`src/proxy.ts` session refresh) | ✅ Implemented | Built with Next.js 16 Proxy convention; cookie refresh on matching routes |
+| Registration Page (`/signup`) | ✅ Implemented | Full client/server validation, display name, password requirements, loading states |
+| Email Confirmation Handling | ✅ Implemented | Dedicated "Check your email" view when confirmation is required; does not falsely mark user signed in |
+| Login Page (`/login`) | ✅ Implemented | Email/password login, show/hide toggle, query error handling, disabled during submit |
+| Auth Callback Route (`/auth/callback`) | ✅ Implemented | PKCE code exchange with open redirect protection (relative paths only) |
+| Protected Dashboard (`/dashboard`) | ✅ Implemented | Server-side identity validation (`getUser()`), RLS profile query, blocking route (`instant = false`) |
+| State-changing Logout (`POST /auth/signout`) | ✅ Implemented | Form POST endpoint and Server Action; clears cookies and redirects to `/` |
+| Landing Page Auth Navigation | ✅ Implemented | Suspense-wrapped `AuthNav` streaming user state; Login/Signup buttons for visitors |
 
 ---
 

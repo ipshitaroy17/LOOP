@@ -42,6 +42,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       projects: {
         Row: {
@@ -83,6 +84,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       user_projects: {
         Row: {
@@ -109,6 +111,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       learning_progress: {
         Row: {
@@ -147,6 +150,7 @@ export interface Database {
           notes?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

@@ -94,6 +94,17 @@
 - **Check 2.6 explicit:** Both `user_projects` and `learning_progress` are checked independently; failing either table is recorded as a failure.  
 - **Count corrected:** 4 anonymous + 8 authenticated = 12. The earlier "8/8" summary was a counting error.
 
+### Next.js 16 Proxy convention and Cache Components (Day 3)
+**Decision:** Implement cookie session refresh using `src/proxy.ts` (Next.js 16 convention) and accommodate Next.js 16 Cache Components and Partial Prerendering (PPR).
+**Rationale:**
+- Next.js 16 deprecates `middleware.ts` in favor of `src/proxy.ts` (`export function proxy(request)`).
+- Under `cacheComponents: true` (Next.js 16 default in this scaffold), traditional segment configs `dynamic = 'force-dynamic'` and `revalidate = 0` are deprecated and throw build errors.
+- Dynamic runtime routes accessing `cookies()` at top-level use `export const instant = false` (e.g. `/dashboard`).
+- Public landing pages with dynamic user indicators isolate dynamic auth fetching within a `<Suspense>` boundary (`<AuthNav />`), allowing the landing page to be prerendered statically while user state streams in dynamically.
+
+---
+
+## Open decisions
 
 | Decision | Status | Notes |
 |----------|--------|-------|
