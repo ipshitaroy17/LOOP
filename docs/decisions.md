@@ -83,13 +83,16 @@
 ### RLS Test Script: use explicit table output, not RAISE NOTICE
 **Problem:** The original `rls_verification.sql` used `RAISE NOTICE` to report pass/fail messages and `rollback` to clean up. The Supabase SQL Editor does not display `RAISE NOTICE` output — it only shows query result rows. When the script ran, the output was "Success. No rows returned", which gave no evidence of which checks passed or failed. It also swallowed some potential failures: check 1.3 (anonymous reads profiles) catches any exception and prints PASS unconditionally whether the exception was a permissions error or something unrelated.
 
-**Fix:** Rewrote `supabase/tests/rls_verification.sql`:
-- Each check records its own boolean pass flag and failure detail string; no assertion swallows a failure silently.
-- After all checks run, results are inserted into a temporary table (`rls_test_results`) with explicit `PASS` / `FAIL: <reason>` status per row.
-- The final `SELECT` returns a visible results table in the SQL Editor Results tab.
-- If any check fails, the script raises an exception so the overall SQL result is an error (not silent success).
-- Cleanup is done by explicit `DELETE` before and after (not `rollback`), so the results table persists for inspection.
-- Check count corrected to 12 (not 8): 4 anonymous + 8 authenticated. The earlier "8/8" summary was a counting error.
+**v2 fix:** Rewrote to return a results table from a temp table using `SELECT` after the `DO` block. Used explicit `DELETE` cleanup instead of `BEGIN/ROLLBACK`, so the results rows persist past cleanup. Count corrected from 8 to 12.
+
+**v3 fix (current):** A second rewrite addressing:
+- **Transaction safety:** All fixtures now run inside `BEGIN/ROLLBACK`. Nothing is ever committed.  
+- **Specific exception catching:** Negative DML tests (checks that expect permission denial) now catch only `insufficient_privilege` and `check_violation`. They no longer use `WHEN OTHERS`, which could silently swallow an unrelated bug and misreport it as a pass.  
+- **Failure reporting:** If any check fails, all failure details are embedded in one final `RAISE EXCEPTION` message, which the SQL Editor displays as an error. This avoids claiming rows in the result table are visible after an unhandled exception rolls the transaction back.  
+- **SELECT before ROLLBACK:** On a fully passing run, the `SELECT` returning the 12-row results table runs inside the transaction, before `ROLLBACK`. The client receives those rows before the rollback cleans up.  
+- **Check 2.8 extended:** Now tests both `DELETE` and `UPDATE` on the project catalogue, matching the description "cannot delete or update".  
+- **Check 2.6 explicit:** Both `user_projects` and `learning_progress` are checked independently; failing either table is recorded as a failure.  
+- **Count corrected:** 4 anonymous + 8 authenticated = 12. The earlier "8/8" summary was a counting error.
 
 
 | Decision | Status | Notes |
