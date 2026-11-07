@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import Link from 'next/link';
 import type { OnboardingPreferences, MultipleAnswer, SingleAnswer } from '@/lib/onboarding/types';
 
@@ -38,6 +39,9 @@ export default async function DashboardPage() {
     user.email?.split('@')[0] ||
     'Crochet Learner';
 
+  // connection() tells Next.js 16 this value is intentionally request-time,
+  // preventing the "unstable Date.now()" prerender error.
+  await connection();
   const memberSince = user.created_at
     ? new Date(user.created_at).toLocaleDateString('en-US', {
         month: 'long',
