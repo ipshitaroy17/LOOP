@@ -8,6 +8,11 @@ import type { OnboardingPreferences, MultipleAnswer, SingleAnswer } from '@/lib/
 export const instant = false;
 
 export default async function DashboardPage() {
+  // connection() signals to Next.js 16 that this route renders at request time,
+  // preventing prerender errors from Supabase auth's internal Date.now() token checks
+  // and Date formatting.
+  await connection();
+
   const supabase = await createClient();
 
   // Validate authenticated identity on the server
@@ -39,9 +44,6 @@ export default async function DashboardPage() {
     user.email?.split('@')[0] ||
     'Crochet Learner';
 
-  // connection() tells Next.js 16 this value is intentionally request-time,
-  // preventing the "unstable Date.now()" prerender error.
-  await connection();
   const memberSince = user.created_at
     ? new Date(user.created_at).toLocaleDateString('en-US', {
         month: 'long',
