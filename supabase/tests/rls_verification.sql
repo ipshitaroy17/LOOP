@@ -236,18 +236,26 @@ begin
   r_descs := array_append(r_descs, 'User A can update own profile'::text);
   r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
-  -- 2.4  User A cannot update User B profile
+  -- 2.4  User A cannot update or delete User B profile
   v_pass := false; v_detail := ''; v_rows := 0;
   update public.profiles set display_name = 'Attacker' where id = user_b;
   get diagnostics v_rows = row_count;
-  if v_rows = 0 then
-    v_pass := true;
-  else
+  if v_rows <> 0 then
     v_detail := 'updated ' || v_rows || ' row(s) for User B';
     v_fails  := array_append(v_fails, ('2.4: ' || v_detail)::text);
+  else
+    -- UPDATE blocked; now verify DELETE is also blocked
+    delete from public.profiles where id = user_b;
+    get diagnostics v_rows = row_count;
+    if v_rows <> 0 then
+      v_detail := 'deleted ' || v_rows || ' row(s) for User B';
+      v_fails  := array_append(v_fails, ('2.4: ' || v_detail)::text);
+    else
+      v_pass := true;
+    end if;
   end if;
   r_ids   := array_append(r_ids, '2.4'::text);
-  r_descs := array_append(r_descs, 'User A cannot update User B profile'::text);
+  r_descs := array_append(r_descs, 'User A cannot update or delete User B profile'::text);
   r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 2.5  User A can save a project AND record learning progress
@@ -272,9 +280,9 @@ begin
   r_descs := array_append(r_descs, 'User A can save project and record learning progress'::text);
   r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
-  -- 2.6  User A cannot read User B user_projects OR learning_progress
-  --      Both tables are checked independently.
-  v_pass := false; v_detail := '';
+  -- 2.6  User A cannot read, update, or delete User B progress (user_projects + learning_progress)
+  --      Checks read isolation, then verifies UPDATE and DELETE are blocked.
+  v_pass := false; v_detail := ''; v_rows := 0;
   select count(*) into v_count from public.user_projects where user_id = user_b;
   if v_count <> 0 then
     v_detail := 'read ' || v_count || ' user_projects row(s) for User B';
@@ -285,16 +293,34 @@ begin
       v_detail := 'read ' || v_count || ' learning_progress row(s) for User B';
       v_fails  := array_append(v_fails, ('2.6: ' || v_detail)::text);
     else
-      v_pass := true;
+      -- Verify UPDATE and DELETE on learning_progress are also blocked
+      update public.learning_progress set video_position_seconds = 999 where user_id = user_b;
+      get diagnostics v_rows = row_count;
+      if v_rows <> 0 then
+        v_detail := 'updated ' || v_rows || ' learning_progress row(s) for User B';
+        v_fails  := array_append(v_fails, ('2.6: ' || v_detail)::text);
+      else
+        delete from public.learning_progress where user_id = user_b;
+        get diagnostics v_rows = row_count;
+        if v_rows <> 0 then
+          v_detail := 'deleted ' || v_rows || ' learning_progress row(s) for User B';
+          v_fails  := array_append(v_fails, ('2.6: ' || v_detail)::text);
+        else
+          v_pass := true;
+        end if;
+      end if;
     end if;
   end if;
   r_ids   := array_append(r_ids, '2.6'::text);
-  r_descs := array_append(r_descs, 'User A cannot read User B project progress (user_projects + learning_progress)'::text);
+  r_descs := array_append(r_descs, 'User A cannot read, update, or delete User B progress (user_projects + learning_progress)'::text);
   r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
-  -- 2.7  User A cannot insert a record owned by User B (ownership spoofing)
-  --      Catch only the two error codes an RLS WITH CHECK violation produces.
-  v_pass := false; v_detail := 'insert succeeded without error'; v_caught := false;
+  -- 2.7  User A cannot insert, update, or delete records owned by User B (user_projects)
+  --      Tests:
+  --      1) INSERT with user_id = user_b must be rejected by RLS WITH CHECK.
+  --      2) UPDATE on user_projects where user_id = user_b must affect 0 rows.
+  --      3) DELETE on user_projects where user_id = user_b must affect 0 rows.
+  v_pass := false; v_detail := 'insert succeeded without error'; v_caught := false; v_rows := 0;
   begin
     insert into public.user_projects (user_id, project_id, status)
     values (user_b, dft_proj, 'saved');
@@ -302,13 +328,31 @@ begin
     when insufficient_privilege then v_caught := true;
     when check_violation        then v_caught := true;
   end;
-  if v_caught then
-    v_pass := true; v_detail := '';
-  else
+
+  if not v_caught then
     v_fails := array_append(v_fails, ('2.7: ' || v_detail)::text);
+  else
+    -- INSERT was blocked; now test UPDATE on User B's user_projects
+    update public.user_projects set status = 'completed' where user_id = user_b;
+    get diagnostics v_rows = row_count;
+    if v_rows <> 0 then
+      v_detail := 'updated ' || v_rows || ' user_projects row(s) for User B';
+      v_fails  := array_append(v_fails, ('2.7: ' || v_detail)::text);
+    else
+      -- UPDATE was blocked; now test DELETE on User B's user_projects
+      delete from public.user_projects where user_id = user_b;
+      get diagnostics v_rows = row_count;
+      if v_rows <> 0 then
+        v_detail := 'deleted ' || v_rows || ' user_projects row(s) for User B';
+        v_fails  := array_append(v_fails, ('2.7: ' || v_detail)::text);
+      else
+        v_pass := true;
+        v_detail := '';
+      end if;
+    end if;
   end if;
   r_ids   := array_append(r_ids, '2.7'::text);
-  r_descs := array_append(r_descs, 'User A cannot create records owned by User B (ownership spoofing)'::text);
+  r_descs := array_append(r_descs, 'User A cannot insert, update, or delete User B user_projects'::text);
   r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 2.8  Authenticated user cannot DELETE or UPDATE project catalogue
