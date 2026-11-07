@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import Link from 'next/link';
 import OnboardingFlow from './OnboardingFlow';
 import type { OnboardingPreferences } from '@/lib/onboarding/types';
@@ -12,6 +13,7 @@ interface OnboardingPageProps {
 }
 
 export default async function OnboardingPage({ searchParams }: OnboardingPageProps) {
+  await connection();
   const supabase = await createClient();
 
   // Validate server-side authentication
