@@ -36,6 +36,11 @@ create temp table if not exists rls_results (
 );
 truncate rls_results;
 
+-- Grant INSERT on the temp results table to the roles the DO block switches
+-- into. This is the only table these grants touch; application table
+-- permissions are unchanged.
+grant insert on rls_results to anon, authenticated;
+
 -- ============================================================================
 -- Everything from here to ROLLBACK is one atomic transaction.
 -- ============================================================================
