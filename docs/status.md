@@ -101,13 +101,12 @@ Open [http://localhost:3000](http://localhost:3000) in Chrome/Firefox/Safari.
 | Browser Client (`src/lib/supabase/client.ts`) | ✅ Implemented | Uses `createBrowserClient` with type definitions |
 | Server Client (`src/lib/supabase/server.ts`) | ✅ Implemented | Uses `createServerClient` with asynchronous cookies (`next/headers`) |
 | Environment configuration & graceful degradation | ✅ Implemented | Lazy evaluation in `src/lib/supabase/config.ts`; landing page unaffected |
-| Initial Schema Migration (`20261107000000_initial_schema.sql`) | ✅ Implemented | Authored with `profiles`, `projects`, `user_projects`, `learning_progress` |
-| RLS Policies & Grants defined | ✅ Implemented | Strict owner isolation, catalogue read-only for public, grants restricted |
-| Auth-user Profile Creation Trigger | ✅ Implemented | `handle_new_user()` security-definer function on `auth.users` |
-| Development Connection Health Check | ✅ Implemented | Verified via `npm run check:supabase` (safe missing-config reporting) and `/api/health/supabase` |
-| Repeatable RLS SQL Test Suite (`rls_verification.sql`) | ✅ Implemented | Authored with transaction rollback and 8-point permission checks |
-| Migration applied to user Supabase project | ⏳ Pending | Awaiting user execution in Supabase Dashboard SQL Editor |
-| Real database connection verification | ⏳ Pending | Awaiting user `.env.local` credentials |
+| Initial Schema Migration (`20261107000000_initial_schema.sql`) | ✅ Implemented | Applied to Supabase project; tables `profiles`, `projects`, `user_projects`, `learning_progress` created |
+| RLS Policies & Grants defined | ✅ Implemented | Strict owner isolation, catalogue read-only for public, table grants restricted |
+| Auth-user Profile Creation Trigger | ✅ Implemented | `handle_new_user()` security-definer function on `auth.users` with fixed `search_path` |
+| Development Connection Health Check | ✅ Implemented | CLI check script (`npm run check:supabase`) and `/api/health/supabase` endpoint |
+| Real database connection verification | ✅ Implemented | `npm run check:supabase` returned `[CONNECTED — EMPTY CATALOGUE]` (status 200, 0 published projects) |
+| Repeatable RLS SQL Test Suite (`rls_verification.sql`) | ⏳ Awaiting Run | Test script authored with 8 automated multi-role checks; awaiting user execution in SQL Editor |
 
 ---
 
