@@ -1,7 +1,12 @@
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { createOptionalClient } from '@/lib/supabase/server';
 
 export default async function AuthNav() {
+  // connection() marks this component as request-time, preventing Next.js 16
+  // from flagging the cookie read (via createOptionalClient) as an unstable
+  // prerender value on the otherwise-static landing page.
+  await connection();
   const supabase = await createOptionalClient();
   let user = null;
 
