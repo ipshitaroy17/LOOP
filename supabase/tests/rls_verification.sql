@@ -12,24 +12,25 @@
 --   ---------|-------------------------------------------------|---------------
 --   1.1      | Anonymous can read published projects           | PASS
 --   ...      | ...                                             | PASS
---   SUMMARY  | All 12 checks passed                           | 12 / 12 PASSED
+--   SUMMARY  | All 12 checks passed                            | 12 / 12 PASSED
 --
 -- ON FAILURE:
 --   The script raises an error. The error message contains each failing
 --   check's id and reason (e.g. "1.3: read 2 rows | 2.7: insert succeeded").
 --   The SELECT below runs only when every check passes.
 --
--- SAFETY
+-- SAFETY & ISOLATION:
 --   Every INSERT, UPDATE, and DELETE runs inside a single transaction that
 --   ends in ROLLBACK. No test data is ever committed to the database.
 --
--- DESIGN NOTE: all INSERT INTO rls_results calls are deferred until after
---   RESET ROLE so they always run as the original session user. This avoids
---   search_path and permission issues with the anon/authenticated roles.
+-- ARCHITECTURE NOTE:
+--   All writes to rls_results are deferred until after RESET ROLE so they
+--   always execute under the original session user. Check results are
+--   collected in PL/pgSQL arrays via explicit array_append() calls.
 -- ============================================================================
 
--- Temp table is created and granted outside the transaction so it exists
--- for the session. Its rows are rolled back at the end along with fixtures.
+-- Temp table is created outside the transaction so its definition persists
+-- for the session. Any rows inserted inside the transaction are rolled back.
 create temp table if not exists rls_results (
   check_id    text primary key,
   description text not null,
@@ -106,12 +107,12 @@ declare
   v_detail text;
 
   -- Failure accumulator
-  v_fails  text[] := '{}';
+  v_fails  text[] := array[]::text[];
 
   -- Result arrays — populated during checks, inserted after RESET ROLE
-  r_ids    text[] := '{}';
-  r_descs  text[] := '{}';
-  r_stats  text[] := '{}';
+  r_ids    text[] := array[]::text[];
+  r_descs  text[] := array[]::text[];
+  r_stats  text[] := array[]::text[];
 
   i integer;
 begin
@@ -130,11 +131,11 @@ begin
     v_pass := true;
   else
     v_detail := 'expected 1 row, got ' || v_count;
-    v_fails  := v_fails || ('1.1: ' || v_detail);
+    v_fails  := array_append(v_fails, ('1.1: ' || v_detail)::text);
   end if;
-  r_ids   := r_ids   || '1.1';
-  r_descs := r_descs || 'Anonymous can read published projects';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '1.1'::text);
+  r_descs := array_append(r_descs, 'Anonymous can read published projects'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 1.2  Anonymous cannot read draft projects
   v_pass := false; v_detail := '';
@@ -143,11 +144,11 @@ begin
     v_pass := true;
   else
     v_detail := 'read ' || v_count || ' unpublished row(s)';
-    v_fails  := v_fails || ('1.2: ' || v_detail);
+    v_fails  := array_append(v_fails, ('1.2: ' || v_detail)::text);
   end if;
-  r_ids   := r_ids   || '1.2';
-  r_descs := r_descs || 'Anonymous cannot read draft/unpublished projects';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '1.2'::text);
+  r_descs := array_append(r_descs, 'Anonymous cannot read draft/unpublished projects'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 1.3  Anonymous cannot read user profiles
   --      Catch only insufficient_privilege (table grant revoked).
@@ -163,11 +164,11 @@ begin
     v_pass := true;
   else
     v_detail := 'read ' || v_count || ' profile row(s)';
-    v_fails  := v_fails || ('1.3: ' || v_detail);
+    v_fails  := array_append(v_fails, ('1.3: ' || v_detail)::text);
   end if;
-  r_ids   := r_ids   || '1.3';
-  r_descs := r_descs || 'Anonymous cannot read user profiles';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '1.3'::text);
+  r_descs := array_append(r_descs, 'Anonymous cannot read user profiles'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 1.4  Anonymous cannot insert into project catalogue
   --      Catch only insufficient_privilege; our RAISE EXCEPTION is not caught.
@@ -181,11 +182,11 @@ begin
   if v_caught then
     v_pass := true; v_detail := '';
   else
-    v_fails := v_fails || ('1.4: ' || v_detail);
+    v_fails := array_append(v_fails, ('1.4: ' || v_detail)::text);
   end if;
-  r_ids   := r_ids   || '1.4';
-  r_descs := r_descs || 'Anonymous cannot insert into project catalogue';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '1.4'::text);
+  r_descs := array_append(r_descs, 'Anonymous cannot insert into project catalogue'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- ==========================================================================
   -- GROUP 2 — Authenticated User A, isolated from User B (8 checks)
@@ -202,11 +203,11 @@ begin
     v_pass := true;
   else
     v_detail := 'expected 1, got ' || v_count;
-    v_fails  := v_fails || ('2.1: ' || v_detail);
+    v_fails  := array_append(v_fails, ('2.1: ' || v_detail)::text);
   end if;
-  r_ids   := r_ids   || '2.1';
-  r_descs := r_descs || 'User A can read own profile';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '2.1'::text);
+  r_descs := array_append(r_descs, 'User A can read own profile'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 2.2  User A cannot read User B profile
   v_pass := false; v_detail := '';
@@ -215,11 +216,11 @@ begin
     v_pass := true;
   else
     v_detail := 'read ' || v_count || ' row(s) for User B';
-    v_fails  := v_fails || ('2.2: ' || v_detail);
+    v_fails  := array_append(v_fails, ('2.2: ' || v_detail)::text);
   end if;
-  r_ids   := r_ids   || '2.2';
-  r_descs := r_descs || 'User A cannot read User B profile';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '2.2'::text);
+  r_descs := array_append(r_descs, 'User A cannot read User B profile'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 2.3  User A can update own profile
   v_pass := false; v_detail := ''; v_rows := 0;
@@ -229,11 +230,11 @@ begin
     v_pass := true;
   else
     v_detail := 'updated ' || v_rows || ' rows (expected 1)';
-    v_fails  := v_fails || ('2.3: ' || v_detail);
+    v_fails  := array_append(v_fails, ('2.3: ' || v_detail)::text);
   end if;
-  r_ids   := r_ids   || '2.3';
-  r_descs := r_descs || 'User A can update own profile';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '2.3'::text);
+  r_descs := array_append(r_descs, 'User A can update own profile'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 2.4  User A cannot update User B profile
   v_pass := false; v_detail := ''; v_rows := 0;
@@ -243,11 +244,11 @@ begin
     v_pass := true;
   else
     v_detail := 'updated ' || v_rows || ' row(s) for User B';
-    v_fails  := v_fails || ('2.4: ' || v_detail);
+    v_fails  := array_append(v_fails, ('2.4: ' || v_detail)::text);
   end if;
-  r_ids   := r_ids   || '2.4';
-  r_descs := r_descs || 'User A cannot update User B profile';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '2.4'::text);
+  r_descs := array_append(r_descs, 'User A cannot update User B profile'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 2.5  User A can save a project AND record learning progress
   --      Both INSERTs must succeed. WHEN OTHERS is correct here: this is a
@@ -265,11 +266,11 @@ begin
   exception
     when others then
       v_detail := sqlerrm;
-      v_fails  := v_fails || ('2.5: ' || v_detail);
+      v_fails  := array_append(v_fails, ('2.5: ' || v_detail)::text);
   end;
-  r_ids   := r_ids   || '2.5';
-  r_descs := r_descs || 'User A can save project and record learning progress';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '2.5'::text);
+  r_descs := array_append(r_descs, 'User A can save project and record learning progress'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 2.6  User A cannot read User B user_projects OR learning_progress
   --      Both tables are checked independently.
@@ -277,19 +278,19 @@ begin
   select count(*) into v_count from public.user_projects where user_id = user_b;
   if v_count <> 0 then
     v_detail := 'read ' || v_count || ' user_projects row(s) for User B';
-    v_fails  := v_fails || ('2.6: ' || v_detail);
+    v_fails  := array_append(v_fails, ('2.6: ' || v_detail)::text);
   else
     select count(*) into v_count from public.learning_progress where user_id = user_b;
     if v_count <> 0 then
       v_detail := 'read ' || v_count || ' learning_progress row(s) for User B';
-      v_fails  := v_fails || ('2.6: ' || v_detail);
+      v_fails  := array_append(v_fails, ('2.6: ' || v_detail)::text);
     else
       v_pass := true;
     end if;
   end if;
-  r_ids   := r_ids   || '2.6';
-  r_descs := r_descs || 'User A cannot read User B project progress (user_projects + learning_progress)';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '2.6'::text);
+  r_descs := array_append(r_descs, 'User A cannot read User B project progress (user_projects + learning_progress)'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 2.7  User A cannot insert a record owned by User B (ownership spoofing)
   --      Catch only the two error codes an RLS WITH CHECK violation produces.
@@ -304,11 +305,11 @@ begin
   if v_caught then
     v_pass := true; v_detail := '';
   else
-    v_fails := v_fails || ('2.7: ' || v_detail);
+    v_fails := array_append(v_fails, ('2.7: ' || v_detail)::text);
   end if;
-  r_ids   := r_ids   || '2.7';
-  r_descs := r_descs || 'User A cannot create records owned by User B (ownership spoofing)';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '2.7'::text);
+  r_descs := array_append(r_descs, 'User A cannot create records owned by User B (ownership spoofing)'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- 2.8  Authenticated user cannot DELETE or UPDATE project catalogue
   --      Two operations tested; both must be blocked.
@@ -323,7 +324,7 @@ begin
 
   if not v_caught and v_rows > 0 then
     v_detail := 'deleted ' || v_rows || ' catalogue row(s)';
-    v_fails  := v_fails || ('2.8: ' || v_detail);
+    v_fails  := array_append(v_fails, ('2.8: ' || v_detail)::text);
   else
     -- DELETE was blocked; now test UPDATE
     v_caught := false; v_rows := 0;
@@ -335,14 +336,14 @@ begin
     end;
     if not v_caught and v_rows > 0 then
       v_detail := 'updated ' || v_rows || ' catalogue row(s)';
-      v_fails  := v_fails || ('2.8: ' || v_detail);
+      v_fails  := array_append(v_fails, ('2.8: ' || v_detail)::text);
     else
       v_pass := true;
     end if;
   end if;
-  r_ids   := r_ids   || '2.8';
-  r_descs := r_descs || 'Authenticated user cannot delete or update project catalogue';
-  r_stats := r_stats || case when v_pass then 'PASS' else 'FAIL: ' || v_detail end;
+  r_ids   := array_append(r_ids, '2.8'::text);
+  r_descs := array_append(r_descs, 'Authenticated user cannot delete or update project catalogue'::text);
+  r_stats := array_append(r_stats, (case when v_pass then 'PASS' else 'FAIL: ' || v_detail end)::text);
 
   -- ==========================================================================
   -- Back to session user before writing any results
