@@ -106,7 +106,7 @@ Open [http://localhost:3000](http://localhost:3000) in Chrome/Firefox/Safari.
 | Auth-user Profile Creation Trigger | ✅ Implemented | `handle_new_user()` security-definer function on `auth.users` with fixed `search_path` |
 | Development Connection Health Check | ✅ Implemented | CLI check script (`npm run check:supabase`) and `/api/health/supabase` endpoint |
 | Real database connection verification | ✅ Implemented | `npm run check:supabase` returned `[CONNECTED — EMPTY CATALOGUE]` (status 200, 0 published projects) |
-| Repeatable RLS SQL Test Suite (`rls_verification.sql`) | ⏳ Awaiting Run | Test script authored with 8 automated multi-role checks; awaiting user execution in SQL Editor |
+| Repeatable RLS SQL Test Suite (`rls_verification.sql`) | ✅ Revised | Rewritten to output explicit tabular PASS/FAIL rows in SQL Editor. Covers 12 checks across anonymous and authenticated roles. User ran earlier version; "Success. No rows returned" was not conclusive — script relied on RAISE NOTICE which Supabase SQL Editor does not display. New script returns a results table directly. **Awaiting re-run.** |
 
 ---
 

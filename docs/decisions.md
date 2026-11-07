@@ -80,9 +80,17 @@
 **Decision:** No placeholder testimonials, popularity statistics, or fake integrations on any page.  
 **Rationale:** Accuracy and honesty are core product values. Fake social proof would need to be removed before launch and could mislead early testers.
 
----
+### RLS Test Script: use explicit table output, not RAISE NOTICE
+**Problem:** The original `rls_verification.sql` used `RAISE NOTICE` to report pass/fail messages and `rollback` to clean up. The Supabase SQL Editor does not display `RAISE NOTICE` output — it only shows query result rows. When the script ran, the output was "Success. No rows returned", which gave no evidence of which checks passed or failed. It also swallowed some potential failures: check 1.3 (anonymous reads profiles) catches any exception and prints PASS unconditionally whether the exception was a permissions error or something unrelated.
 
-## Open decisions
+**Fix:** Rewrote `supabase/tests/rls_verification.sql`:
+- Each check records its own boolean pass flag and failure detail string; no assertion swallows a failure silently.
+- After all checks run, results are inserted into a temporary table (`rls_test_results`) with explicit `PASS` / `FAIL: <reason>` status per row.
+- The final `SELECT` returns a visible results table in the SQL Editor Results tab.
+- If any check fails, the script raises an exception so the overall SQL result is an error (not silent success).
+- Cleanup is done by explicit `DELETE` before and after (not `rollback`), so the results table persists for inspection.
+- Check count corrected to 12 (not 8): 4 anonymous + 8 authenticated. The earlier "8/8" summary was a counting error.
+
 
 | Decision | Status | Notes |
 |----------|--------|-------|
