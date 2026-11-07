@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import type { OnboardingPreferences, MultipleAnswer, SingleAnswer } from '@/lib/onboarding/types';
 
 // Allow blocking route for runtime cookies authentication
 export const instant = false;
@@ -15,7 +16,7 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   if (!user || userError) {
-    redirect('/login');
+    redirect('/login?redirect=/dashboard');
   }
 
   // Fetch the user's profile under their authenticated RLS policy
@@ -24,6 +25,11 @@ export default async function DashboardPage() {
     .select('*')
     .eq('id', user.id)
     .maybeSingle();
+
+  // If user has not completed onboarding, redirect to onboarding flow
+  if (profile && !profile.onboarding_completed) {
+    redirect('/onboarding');
+  }
 
   const displayName =
     profile?.display_name ||
@@ -38,6 +44,40 @@ export default async function DashboardPage() {
         year: 'numeric',
       })
     : null;
+
+  // Extract saved preferences for the summary card
+  const preferences = (profile?.onboarding_preferences as unknown as OnboardingPreferences) || null;
+  const answers = preferences?.answers || {};
+
+  // 1. Experience Level
+  let experienceLabel = 'Not specified';
+  if (profile?.experience_level === 'beginner') experienceLabel = 'Complete beginner';
+  else if (profile?.experience_level === 'intermediate') experienceLabel = 'Intermediate';
+  else if (profile?.experience_level === 'advanced') experienceLabel = 'Experienced';
+  else if (answers.experience_level && !('skipped' in answers.experience_level)) {
+    experienceLabel = (answers.experience_level as SingleAnswer).label;
+  }
+
+  // 2. Interests
+  let interestsLabel = 'Not specified';
+  if (answers.interests) {
+    if ('skipped' in answers.interests) {
+      interestsLabel = 'Skipped for now';
+    } else {
+      const multi = answers.interests as MultipleAnswer;
+      interestsLabel = multi.labels && multi.labels.length > 0 ? multi.labels.join(', ') : 'None selected';
+    }
+  }
+
+  // 3. Preferred Learning Mode
+  let learningModeLabel = 'Not specified';
+  if (answers.learning_style) {
+    if ('skipped' in answers.learning_style) {
+      learningModeLabel = 'Skipped for now';
+    } else {
+      learningModeLabel = (answers.learning_style as SingleAnswer).label || 'Not specified';
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-cream)' }}>
@@ -91,11 +131,64 @@ export default async function DashboardPage() {
             Welcome, {displayName}!
           </h1>
           <p className="text-base" style={{ color: 'var(--color-charcoal-soft)' }}>
-            Your LOOP account is active and connected to Supabase.
+            Your learning profile is set up and saved to Supabase.
           </p>
         </section>
 
-        {/* Minimal Account Card */}
+        {/* Learning Preferences Summary Card */}
+        <section
+          aria-labelledby="preferences-heading"
+          className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-black/5 mb-8"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-black/5">
+            <div>
+              <h2 id="preferences-heading" className="text-lg font-semibold" style={{ color: 'var(--color-charcoal)' }}>
+                Your Learning Preferences
+              </h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Saved preferences guide your future crochet recommendations.
+              </p>
+            </div>
+            <Link
+              href="/onboarding?edit=true"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-full text-xs font-semibold border border-black/10 transition-colors hover:bg-black/5 self-start sm:self-auto"
+              style={{ color: 'var(--color-charcoal)' }}
+            >
+              Edit learning preferences
+            </Link>
+          </div>
+
+          <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+            <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-cream)' }}>
+              <dt className="font-medium text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--color-charcoal-soft)' }}>
+                Skill Level
+              </dt>
+              <dd className="font-semibold text-base" style={{ color: 'var(--color-charcoal)' }}>
+                {experienceLabel}
+              </dd>
+            </div>
+
+            <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-cream)' }}>
+              <dt className="font-medium text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--color-charcoal-soft)' }}>
+                Preferred Learning Style
+              </dt>
+              <dd className="font-semibold text-base" style={{ color: 'var(--color-charcoal)' }}>
+                {learningModeLabel}
+              </dd>
+            </div>
+
+            <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-cream)' }}>
+              <dt className="font-medium text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--color-charcoal-soft)' }}>
+                Interested in Making
+              </dt>
+              <dd className="font-semibold text-base" style={{ color: 'var(--color-charcoal)' }}>
+                {interestsLabel}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        {/* Account Details Card */}
         <section
           aria-label="Account status"
           className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-black/5"
@@ -140,7 +233,7 @@ export default async function DashboardPage() {
               </dt>
               <dd className="font-semibold flex items-center gap-1.5" style={{ color: 'var(--color-sage)' }}>
                 <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: 'var(--color-sage)' }} />
-                Authenticated
+                Onboarding Completed
               </dd>
             </div>
           </dl>

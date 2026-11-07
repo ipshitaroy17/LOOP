@@ -183,7 +183,24 @@ export async function signInAction(formData: FormData): Promise<AuthActionResult
       };
     }
 
-    const destination = getSafeRedirect(redirectTarget);
+    let destination = '/dashboard';
+    if (!redirectTarget) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (profile && !profile.onboarding_completed) {
+          destination = '/onboarding';
+        }
+      }
+    } else {
+      destination = getSafeRedirect(redirectTarget);
+    }
+
     redirect(destination);
   } catch (err: unknown) {
     // Next.js redirect() throws a special NEXT_REDIRECT error which should propagate
@@ -213,3 +230,4 @@ export async function signOutAction(): Promise<void> {
   }
   redirect('/');
 }
+

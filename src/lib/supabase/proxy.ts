@@ -51,8 +51,8 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // Protect /dashboard — redirect unauthenticated visitors to /login
-  if (!user && pathname.startsWith('/dashboard')) {
+  // Protect /dashboard and /onboarding — redirect unauthenticated visitors to /login
+  if (!user && (pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding'))) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirect', pathname);
@@ -68,3 +68,4 @@ export async function updateSession(request: NextRequest) {
 
   return supabaseResponse;
 }
+

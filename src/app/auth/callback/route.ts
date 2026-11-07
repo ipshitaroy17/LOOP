@@ -53,8 +53,24 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(errorRedirectUrl);
       }
 
-      // Successfully confirmed and authenticated: redirect to destination
-      const destinationUrl = new URL(safeTarget, requestUrl.origin);
+      // Successfully confirmed and authenticated: check onboarding status
+      let targetPath = safeTarget;
+      if (!next) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('onboarding_completed')
+            .eq('id', user.id)
+            .maybeSingle();
+
+          if (profile && !profile.onboarding_completed) {
+            targetPath = '/onboarding';
+          }
+        }
+      }
+
+      const destinationUrl = new URL(targetPath, requestUrl.origin);
       return NextResponse.redirect(destinationUrl);
     } catch {
       const errorRedirectUrl = new URL('/login', requestUrl.origin);
@@ -69,3 +85,4 @@ export async function GET(request: NextRequest) {
   // No code provided: redirect to login
   return NextResponse.redirect(new URL('/login', requestUrl.origin));
 }
+

@@ -125,6 +125,23 @@ Open [http://localhost:3000](http://localhost:3000) in Chrome/Firefox/Safari.
 
 ---
 
+## Personalized Onboarding & Preferences (Day 4)
+
+| Item | Status | Validation |
+|------|--------|------------|
+| One-question-at-a-time flow (`/onboarding`) | ✅ Implemented | 8-question guided flow with step navigation, progress indicator ("Question X of 8") |
+| Radio & Checkbox Semantics | ✅ Implemented | Accessible radio groups for single-choice and checkboxes for multiple-choice (Q4) |
+| Required Q1 validation & enum mapping | ✅ Implemented | Q1 required; "Complete beginner" → `beginner`, "Intermediate" → `intermediate`, "Experienced" → `advanced` |
+| Explicit skipping (Q2–Q8) | ✅ Implemented | "Skip for now" stores `{ skipped: true }` explicitly; never invents responses |
+| Persistent Progress & Auto-resume | ✅ Implemented | Saves each step to `onboarding_preferences`; restores step position on reload or re-login |
+| Server-derived User ID & Validation | ✅ Implemented | User ID derived securely from authenticated session (`getUser()`); answer payloads validated server-side |
+| Atomic Completion Update | ✅ Implemented | Saves final answers, `experience_level`, and `onboarding_completed = true` in single database update |
+| Comprehensive Routing Guards | ✅ Implemented | Incomplete users visiting `/dashboard` redirect to `/onboarding`; completed users visiting `/onboarding` redirect to `/dashboard` unless `edit=true` |
+| Dashboard Preferences Summary | ✅ Implemented | Displays Skill Level, Preferred Learning Style, and Interests (handles skipped answers naturally) |
+| Preferences Edit Mode (`/onboarding?edit=true`) | ✅ Implemented | Allows completed users to edit preferences without resetting `onboarding_completed`; includes return to dashboard link |
+
+---
+
 ## Documentation
 
 | Item | Status |
@@ -136,13 +153,17 @@ Open [http://localhost:3000](http://localhost:3000) in Chrome/Firefox/Safari.
 
 ---
 
-## Next Milestones (Day 3+)
+## Next Milestones (Day 5+)
 
 | Feature | Status |
 |---------|--------|
-| Authentication UI & flows (sign up / sign in / sign out) | 📋 Planned |
-| Onboarding flow | 📋 Planned |
-| Projects listing page | 📋 Planned |
+| Projects listing & catalogue browsing | 📋 Planned |
+| Written pattern view | 📋 Planned |
+| Guided steps view | 📋 Planned |
+| Video player (embedded) | 📋 Planned |
+| Step-by-step progress tracking | 📋 Planned |
+| AI crochet tutor | 📋 Planned |
+| Image upload / image-to-pattern | 📋 Planned (post-core) |
 | Written pattern view | 📋 Planned |
 | Guided steps view | 📋 Planned |
 | Video player (embedded) | 📋 Planned |

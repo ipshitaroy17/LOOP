@@ -150,7 +150,7 @@ export default function Home() {
                 color: "var(--color-charcoal)",
               }}
             >
-              Day 3 — authentication
+              Day 4 — personalized onboarding
             </span>
           </p>
         </footer>

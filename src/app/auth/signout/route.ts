@@ -18,3 +18,4 @@ export async function POST(request: NextRequest) {
     status: 303, // See Other: forces a GET request on the destination
   });
 }
+

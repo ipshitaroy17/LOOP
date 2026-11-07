@@ -102,6 +102,15 @@
 - Dynamic runtime routes accessing `cookies()` at top-level use `export const instant = false` (e.g. `/dashboard`).
 - Public landing pages with dynamic user indicators isolate dynamic auth fetching within a `<Suspense>` boundary (`<AuthNav />`), allowing the landing page to be prerendered statically while user state streams in dynamically.
 
+### Onboarding Preferences Architecture (Day 4)
+**Decision:** Store onboarding answers in `profiles.onboarding_preferences` using a typed, versioned JSONB structure, alongside explicit mapping of Q1 to `profiles.experience_level`.
+**Rationale:**
+- **Schema stability:** The PostgreSQL `experience_level` enum expects `'beginner' | 'intermediate' | 'advanced'`. The UI prompt uses "Experienced", which is explicitly mapped to `'advanced'`.
+- **Distinguishing skipped vs unanswered:** Skipped questions explicitly store `{ skipped: true }` in the JSONB payload. This allows the system to distinguish between a question that was skipped intentionally vs. one not yet reached.
+- **Incremental save & auto-resume:** Each step is saved to the database on "Continue" or "Skip for now", updating `current_step`. This allows users who close the browser or log out to seamlessly resume where they left off.
+- **Atomic completion:** The final step updates all answers, the `experience_level` enum, and sets `onboarding_completed: true` in a single database transaction/update, preventing partial-completion states.
+- **Non-destructive edit mode:** Users who have already completed onboarding can access `/onboarding?edit=true` with their previous answers prefilled. Re-opening in edit mode does not reset `onboarding_completed`.
+
 ---
 
 ## Open decisions
