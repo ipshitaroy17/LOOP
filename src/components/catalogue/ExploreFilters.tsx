@@ -34,6 +34,8 @@ export default function ExploreFilters({ totalCount }: ExploreFiltersProps) {
 
   const updateFilters = (newParams: { q?: string; category?: string; difficulty?: string }) => {
     const params = new URLSearchParams(searchParams.toString());
+    // Reset to page 1 whenever any filter or search term changes
+    params.delete('page');
 
     if (newParams.q !== undefined) {
       if (newParams.q.trim()) {

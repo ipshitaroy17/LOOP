@@ -60,9 +60,9 @@
 **Decision:** All patterns use US crochet terminology and label this clearly.  
 **Rationale:** US terminology is the most common system in online crochet content. UK/international variants differ on key stitch names (e.g., UK "double crochet" = US "single crochet"). Clear labelling prevents confusion. International variants are a post-core consideration.
 
-### One video per project (core release)
-**Decision:** Each project has exactly one tutorial video in the core release.  
-**Rationale:** Keeps the data model straightforward. The `tutorials` table supports multiple videos per project for future expansion.
+### Multiple tutorials per project via composite unique key
+**Decision:** Replace the singular `UNIQUE(project_id)` constraint with `UNIQUE(project_id, tutorial_key)`. Each project can offer multiple tutorial choices (e.g., standard vs left-handed, alternate instructors, variation lessons), while different projects represent distinct finished items (e.g. various granny square designs).
+**Rationale:** Enables rich tutorial selection per project without duplicating project entries in user bookmarks or catalogue lists. Each tutorial maintains its own video link, creator attribution, terminology, review status, and verified timestamps. Never share timestamps across unrelated video lessons.
 
 ### Verified timestamp mappings only
 **Decision:** Step-to-video timestamp links are only shown when `verified = true` in `step_video_mappings`.  

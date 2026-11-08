@@ -11,12 +11,14 @@ interface ProjectCardProps {
   project: Project;
   priority?: boolean;
   initialIsSaved?: boolean;
+  searchQueryString?: string;
 }
 
 export default function ProjectCard({
   project,
   priority = false,
   initialIsSaved = false,
+  searchQueryString,
 }: ProjectCardProps) {
   const [imgSrc, setImgSrc] = useState(
     project.thumbnail_url || '/illustrations/projects/project-placeholder.svg'
@@ -37,10 +39,14 @@ export default function ProjectCard({
     }
   })();
 
+  const projectHref = searchQueryString
+    ? `/projects/${project.slug}?${searchQueryString}`
+    : `/projects/${project.slug}`;
+
   return (
     <article className="group bg-white rounded-2xl overflow-hidden border border-black/5 shadow-sm hover:shadow-md transition-all flex flex-col h-full">
       <Link
-        href={`/projects/${project.slug}`}
+        href={projectHref}
         className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C9A6B] focus-visible:ring-offset-2 rounded-2xl flex-1 flex flex-col"
         aria-label={`View project details for ${project.title}`}
       >

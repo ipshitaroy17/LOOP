@@ -7,12 +7,14 @@ import AuthNav from '@/components/AuthNav';
 import { getProjectBySlug } from '@/lib/catalogue/queries';
 import { getCategoryLabel, getDifficultyLabel } from '@/lib/catalogue/categories';
 import { isProjectSavedByUser } from '@/lib/catalogue/saved-projects';
+import { getVerifiedTutorialsByProjectId } from '@/lib/tutorials/queries';
 import SaveButton from '@/components/catalogue/SaveButton';
 
 export const instant = false;
 
 interface ProjectDetailPageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 function NavFallback() {
@@ -39,9 +41,19 @@ function NavFallback() {
   );
 }
 
-export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
+export default async function ProjectDetailPage({ params, searchParams }: ProjectDetailPageProps) {
   await connection();
   const { slug } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+
+  // Preserve filter/search query params when returning to explore
+  const queryParams = new URLSearchParams();
+  for (const [key, val] of Object.entries(resolvedSearchParams)) {
+    if (typeof val === 'string' && val.trim()) {
+      queryParams.set(key, val.trim());
+    }
+  }
+  const backHref = queryParams.toString() ? `/explore?${queryParams.toString()}` : '/explore';
 
   const project = await getProjectBySlug(slug);
 
@@ -51,6 +63,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }
 
   const isSaved = await isProjectSavedByUser(project.id);
+  const tutorials = await getVerifiedTutorialsByProjectId(project.id);
 
   const difficultyColor = (() => {
     switch (project.difficulty) {
@@ -117,7 +130,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         {/* Back Link */}
         <div className="mb-6">
           <Link
-            href="/explore"
+            href={backHref}
             className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider transition-colors hover:underline"
             style={{ color: 'var(--color-sage)' }}
           >
@@ -201,35 +214,103 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </div>
             </div>
 
-            {/* Preview Banner: Explains tutorial status without fake CTA buttons */}
-            <div
-              className="p-5 rounded-2xl border"
-              style={{
-                backgroundColor: 'rgba(245, 216, 126, 0.15)',
-                borderColor: 'var(--color-butter)',
-              }}
-            >
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-amber-100 text-amber-800 mt-0.5">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="text-sm font-bold text-amber-950 mb-1">
-                    Starter Catalogue Preview &bull; Tutorial Coming Soon
+            {/* Tutorial Choices Section: Displays published lessons or preview notice */}
+            {tutorials.length > 0 ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between mb-1">
+                  <h2
+                    className="text-sm font-bold uppercase tracking-wider"
+                    style={{ color: 'var(--color-charcoal)' }}
+                  >
+                    Available Tutorials &amp; Lessons ({tutorials.length})
                   </h2>
-                  <p className="text-xs leading-relaxed text-amber-900">
-                    We are currently crafting step-by-step video demonstrations, interactive row counters, and written pattern charts for this project. Check back in upcoming releases!
-                  </p>
+                </div>
+
+                {tutorials.map((tut) => (
+                  <div
+                    key={tut.id}
+                    className="p-5 rounded-2xl border transition-all hover:shadow-sm"
+                    style={{
+                      backgroundColor: 'rgba(232, 243, 229, 0.6)',
+                      borderColor: 'var(--color-sage)',
+                    }}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-200/80 text-emerald-900">
+                            {tut.terminology} Terms
+                          </span>
+
+                          {project.estimated_duration && (
+                            <span className="text-xs text-gray-600 flex items-center gap-1">
+                              &bull; {project.estimated_duration}
+                            </span>
+                          )}
+
+                          {tut.videoCreatorName && (
+                            <span className="text-xs text-gray-600">
+                              &bull; by {tut.videoCreatorName}
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className="text-base font-bold text-emerald-950 mb-1">
+                          {tut.title}
+                        </h3>
+
+                        <p className="text-xs leading-relaxed text-emerald-900">
+                          {tut.learningObjective}
+                        </p>
+                      </div>
+
+                      <div className="shrink-0">
+                        <Link
+                          href={`/projects/${project.slug}/tutorials/${tut.tutorialKey}`}
+                          className="inline-flex items-center justify-center px-4 py-2 rounded-full text-xs font-semibold shadow-sm transition-all hover:brightness-105"
+                          style={{
+                            backgroundColor: 'var(--color-sage)',
+                            color: '#1F1F1F',
+                          }}
+                        >
+                          Open Lesson &rarr;
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              /* Preview Banner: Explains tutorial status without fake CTA buttons */
+              <div
+                className="p-5 rounded-2xl border"
+                style={{
+                  backgroundColor: 'rgba(245, 216, 126, 0.15)',
+                  borderColor: 'var(--color-butter)',
+                }}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-xl bg-amber-100 text-amber-800 mt-0.5">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-amber-950 mb-1">
+                      Starter Catalogue Preview &bull; Tutorial Coming Soon
+                    </h2>
+                    <p className="text-xs leading-relaxed text-amber-900">
+                      We are currently crafting step-by-step video demonstrations, interactive row counters, and written pattern charts for this project. Check back in upcoming releases!
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

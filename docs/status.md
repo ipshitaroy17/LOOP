@@ -201,6 +201,22 @@ Execute `supabase/seed.sql` in your Supabase SQL Editor (or Dashboard -> SQL Edi
 
 ---
 
+---
+
+## Day 7 Architecture Enhancement — Multi-Tutorial Model & Catalogue Expansion
+
+| Item | Status | Validation |
+|------|--------|------------|
+| Multiple Tutorials Migration (`20261108000000_multiple_tutorials_per_project.sql`) | ✅ Implemented | Drops `unique_project_tutorial`; adds `tutorial_key` unique per project (`UNIQUE(project_id, tutorial_key)`). Safe backfill of existing records with `main`. Adds generated `skills_text` column for fast multi-field search. |
+| Expanded Catalogue Seed (`03_expanded_catalogue.sql`) | ✅ Implemented | Adds 24 distinct project previews (giving 30 total). Covers multiple granny square designs, coasters, flowers/appliqués, accessories, and intermediate makes. Idempotent with `ON CONFLICT (slug) DO NOTHING`. |
+| Database-backed Search & Pagination | ✅ Implemented | Queries title, description, and skills. Deterministic ordering (`title ASC, id ASC`) with 12 items/page and clean `<Pagination>` control. |
+| Preserved Filter/Search Navigation State | ✅ Implemented | Explore cards attach query parameters to links; Project Detail back button and browser history restore exact page/filter state. |
+| Tutorial Selection & Stable Detail Route | ✅ Implemented | Project detail page lists all verified published tutorial choices. Stable tutorial detail route at `/projects/[slug]/tutorials/[tutorialKey]` with strict dual publication gate (404 if draft or parent project unpublished). |
+| Multi-Tutorial RLS Test Suite (`rls_tutorial_verification.sql`) | ✅ Implemented | 16-check rollback verification testing co-located draft/published tutorial isolation on the same project, duplicate tutorial key rejection, step attachment, and dual gates. |
+| Production Build Verification | ✅ Passed | All 15 routes compiled and generated statically/dynamically with exit code 0 (`next build --webpack`). |
+
+---
+
 ## Documentation
 
 | Item | Status |
@@ -209,16 +225,16 @@ Execute `supabase/seed.sql` in your Supabase SQL Editor (or Dashboard -> SQL Edi
 | `docs/product-plan.md` | ✅ Implemented |
 | `docs/status.md` (this file) | ✅ Implemented |
 | `docs/decisions.md` | ✅ Implemented |
+| `docs/tutorial-review-checklist.md` | ✅ Implemented |
 
 ---
 
-## Next Milestones (Day 7+)
+## Next Milestones (Day 8+)
 
 | Feature | Status |
-|---------|--------|
-| Written pattern view | 📋 Planned |
-| Guided steps view | 📋 Planned |
-| Video player (embedded) | 📋 Planned |
-| Step-by-step progress tracking | 📋 Planned |
+|------|--------|
+| Interactive Tutorial View (Video + Written + Steps) | 📋 Planned |
+| YouTube Embed Player Integration | 📋 Planned |
+| Real-time Step Synchronization & Row Counter | 📋 Planned |
+| Step-by-step progress tracking (`learning_progress`) | 📋 Planned |
 | AI crochet tutor | 📋 Planned |
-| Image upload / image-to-pattern | 📋 Planned (post-core) |

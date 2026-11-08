@@ -25,11 +25,16 @@ export interface CatalogueFilters {
   search?: string;
   category?: string;
   difficulty?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface CatalogueQueryResult {
   projects: Project[];
   totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
   error: string | null;
 }
 

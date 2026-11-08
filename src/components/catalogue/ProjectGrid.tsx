@@ -9,6 +9,7 @@ interface ProjectGridProps {
   error?: string | null;
   hasActiveFilters?: boolean;
   savedProjectIds?: string[];
+  searchQueryString?: string;
 }
 
 export default function ProjectGrid({
@@ -16,6 +17,7 @@ export default function ProjectGrid({
   error,
   hasActiveFilters = false,
   savedProjectIds = [],
+  searchQueryString,
 }: ProjectGridProps) {
   // 1. Error state with retry
   if (error) {
@@ -134,6 +136,7 @@ export default function ProjectGrid({
           project={project}
           priority={idx < 3}
           initialIsSaved={savedProjectIds.includes(project.id)}
+          searchQueryString={searchQueryString}
         />
       ))}
     </div>

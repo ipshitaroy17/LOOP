@@ -41,60 +41,94 @@ export function mapRowToProject(row: ProjectRow): Project {
  */
 export async function getPublishedProjects(
   filters: CatalogueFilters = {},
-  limit: number = 50
+  limit?: number
 ): Promise<CatalogueQueryResult> {
+  const page = Math.max(1, filters.page ?? 1);
+  const pageSize = Math.max(1, filters.pageSize ?? limit ?? 12);
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
   const supabase = await createOptionalClient();
 
   if (!supabase) {
     return {
       projects: [],
       totalCount: 0,
+      page,
+      pageSize,
+      totalPages: 1,
       error: 'Supabase client is not configured. Please check your environment variables.',
     };
   }
 
   try {
-    let query = supabase
-      .from('projects')
-      .select('*', { count: 'exact' })
-      .eq('published', true);
+    const buildQuery = (includeSkillsSearch: boolean) => {
+      let q = supabase
+        .from('projects')
+        .select('*', { count: 'exact' })
+        .eq('published', true);
 
-    // Apply category filter if specified
-    if (filters.category && filters.category !== 'all') {
-      query = query.eq('category', filters.category);
+      if (filters.category && filters.category !== 'all') {
+        q = q.eq('category', filters.category);
+      }
+
+      if (filters.difficulty && filters.difficulty !== 'all') {
+        q = q.eq(
+          'difficulty',
+          filters.difficulty as Database['public']['Tables']['projects']['Row']['difficulty']
+        );
+      }
+
+      const cleanSearch = sanitizeSearchQuery(filters.search);
+      if (cleanSearch) {
+        if (includeSkillsSearch) {
+          q = q.or(
+            `title.ilike.%${cleanSearch}%,description.ilike.%${cleanSearch}%,skills_text.ilike.%${cleanSearch}%`
+          );
+        } else {
+          q = q.or(`title.ilike.%${cleanSearch}%,description.ilike.%${cleanSearch}%`);
+        }
+      }
+
+      // Deterministic pagination ordering: primary title ASC, secondary id ASC
+      return q
+        .order('title', { ascending: true })
+        .order('id', { ascending: true })
+        .range(from, to);
+    };
+
+    let { data, count, error } = await buildQuery(true);
+
+    // Resilient fallback if skills_text column is not yet present on remote DB
+    if (error && error.message?.includes('skills_text')) {
+      const fallbackResult = await buildQuery(false);
+      data = fallbackResult.data;
+      count = fallbackResult.count;
+      error = fallbackResult.error;
     }
-
-    // Apply difficulty filter if specified
-    if (filters.difficulty && filters.difficulty !== 'all') {
-      query = query.eq('difficulty', filters.difficulty as Database['public']['Tables']['projects']['Row']['difficulty']);
-    }
-
-    // Apply search filter if specified
-    const cleanSearch = sanitizeSearchQuery(filters.search);
-    if (cleanSearch) {
-      // Search both title and description safely
-      query = query.or(`title.ilike.%${cleanSearch}%,description.ilike.%${cleanSearch}%`);
-    }
-
-    // Deterministic ordering
-    query = query.order('title', { ascending: true }).limit(limit);
-
-    const { data, count, error } = await query;
 
     if (error) {
       console.error('[getPublishedProjects] Supabase error:', error.message);
       return {
         projects: [],
         totalCount: 0,
+        page,
+        pageSize,
+        totalPages: 1,
         error: 'Unable to retrieve projects from the catalogue. Please try again.',
       };
     }
 
     const projects: Project[] = (data || []).map(mapRowToProject);
+    const totalCount = count ?? projects.length;
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
     return {
       projects,
-      totalCount: count ?? projects.length,
+      totalCount,
+      page,
+      pageSize,
+      totalPages,
       error: null,
     };
   } catch (err) {
@@ -102,6 +136,9 @@ export async function getPublishedProjects(
     return {
       projects: [],
       totalCount: 0,
+      page,
+      pageSize,
+      totalPages: 1,
       error: 'A network error occurred while connecting to the catalogue.',
     };
   }

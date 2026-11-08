@@ -4,6 +4,7 @@ import { connection } from 'next/server';
 import AuthNav from '@/components/AuthNav';
 import ExploreFilters from '@/components/catalogue/ExploreFilters';
 import ProjectGrid from '@/components/catalogue/ProjectGrid';
+import Pagination from '@/components/catalogue/Pagination';
 import { getPublishedProjects } from '@/lib/catalogue/queries';
 import { sanitizeCategoryFilter, sanitizeDifficultyFilter } from '@/lib/catalogue/categories';
 import { getUserSavedProjectIds } from '@/lib/catalogue/saved-projects';
@@ -46,6 +47,8 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const rawSearch = typeof resolvedParams.q === 'string' ? resolvedParams.q : undefined;
   const rawCategory = typeof resolvedParams.category === 'string' ? resolvedParams.category : undefined;
   const rawDifficulty = typeof resolvedParams.difficulty === 'string' ? resolvedParams.difficulty : undefined;
+  const rawPage = typeof resolvedParams.page === 'string' ? parseInt(resolvedParams.page, 10) : 1;
+  const page = isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
 
   const category = sanitizeCategoryFilter(rawCategory);
   const difficulty = sanitizeDifficultyFilter(rawDifficulty);
@@ -56,11 +59,21 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     difficulty
   );
 
+  // Construct search query string for card links so Back navigation preserves filters
+  const currentParams = new URLSearchParams();
+  if (rawSearch && rawSearch.trim()) currentParams.set('q', rawSearch.trim());
+  if (category) currentParams.set('category', category);
+  if (difficulty) currentParams.set('difficulty', difficulty);
+  if (page > 1) currentParams.set('page', page.toString());
+  const searchQueryString = currentParams.toString();
+
   const [queryResult, savedProjectIdsSet] = await Promise.all([
     getPublishedProjects({
       search: rawSearch,
       category,
       difficulty,
+      page,
+      pageSize: 12,
     }),
     getUserSavedProjectIds(),
   ]);
@@ -145,6 +158,15 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
           error={queryResult.error}
           hasActiveFilters={hasActiveFilters}
           savedProjectIds={savedProjectIds}
+          searchQueryString={searchQueryString}
+        />
+
+        {/* Database-backed Pagination */}
+        <Pagination
+          currentPage={queryResult.page}
+          totalPages={queryResult.totalPages}
+          totalCount={queryResult.totalCount}
+          pageSize={queryResult.pageSize}
         />
       </main>
 
