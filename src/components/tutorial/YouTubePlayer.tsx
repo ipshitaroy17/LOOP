@@ -18,7 +18,7 @@
  *   className Optional extra classes on the outer wrapper.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { buildEmbedUrl, buildWatchUrl } from '@/lib/youtube/parseVideoId';
 
 interface YouTubePlayerProps {
@@ -31,6 +31,7 @@ type PlayerState = 'loading' | 'ready' | 'error';
 
 export default function YouTubePlayer({ videoId, title, className = '' }: YouTubePlayerProps) {
   const watchUrl = buildWatchUrl(videoId);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // The embed URL is built once after the component mounts so we can include
   // the browser origin (for enablejsapi CORS). The lazy-initialiser form of
@@ -53,7 +54,11 @@ export default function YouTubePlayer({ videoId, title, className = '' }: YouTub
     //   100 — video not found / removed
     //   101 / 150 — owner has disallowed embedding
     function handleMessage(event: MessageEvent) {
+      // Validate origin strictly matches privacy-enhanced YouTube embed host
       if (event.origin !== 'https://www.youtube-nocookie.com') return;
+      // Validate source window matches this specific player's iframe
+      if (iframeRef.current && event.source !== iframeRef.current.contentWindow) return;
+
       try {
         const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
         if (data?.event === 'onError') {
@@ -150,6 +155,7 @@ export default function YouTubePlayer({ videoId, title, className = '' }: YouTub
               </div>
             )}
             <iframe
+              ref={iframeRef}
               src={embedUrl}
               title={title}
               className="absolute inset-0 w-full h-full border-0"

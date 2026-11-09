@@ -24,6 +24,8 @@ import { buildWatchUrl } from '@/lib/youtube/parseVideoId';
  */
 
 // ── Production guard ──────────────────────────────────────────────────────────
+export const instant = false;
+
 // notFound() converts to a 404 in production, making this route completely
 // inaccessible outside of local development.
 const IS_DEV = process.env.NODE_ENV !== 'production';
