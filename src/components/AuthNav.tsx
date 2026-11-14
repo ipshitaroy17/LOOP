@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { createOptionalClient } from '@/lib/supabase/server';
+import PillButton from '@/components/ui/PillButton';
 
 export default async function AuthNav() {
   // connection() marks this component as request-time, preventing Next.js 16
@@ -20,29 +21,25 @@ export default async function AuthNav() {
       <div className="flex items-center gap-2 sm:gap-3">
         <Link
           href="/my-projects"
-          className="text-sm font-medium rounded-full px-3.5 py-2 transition-colors hover:bg-black/5 hidden xs:inline"
-          style={{ color: 'var(--color-charcoal)' }}
+          className="text-sm font-semibold px-3 py-1.5 rounded-full transition-colors hover:text-ink/70 hidden md:inline text-ink"
         >
-          My Projects
+          My projects
         </Link>
-        <Link
+        <PillButton
+          variant="primary"
+          size="sm"
           href="/dashboard"
-          className="text-sm font-medium rounded-full px-4 py-2 transition-colors hover:brightness-105"
-          style={{
-            backgroundColor: 'var(--color-sage)',
-            color: '#1F1F1F',
-          }}
         >
           Dashboard
-        </Link>
-        <form action="/auth/signout" method="POST">
-          <button
+        </PillButton>
+        <form action="/auth/signout" method="POST" className="inline-flex">
+          <PillButton
+            variant="outline"
+            size="sm"
             type="submit"
-            className="text-sm font-medium px-3 py-1.5 rounded-full border border-black/10 transition-colors hover:bg-black/5"
-            style={{ color: 'var(--color-charcoal)' }}
           >
             Log out
-          </button>
+          </PillButton>
         </form>
       </div>
     );
@@ -52,22 +49,17 @@ export default async function AuthNav() {
     <div className="flex items-center gap-2 sm:gap-3">
       <Link
         href="/login"
-        className="text-sm font-medium rounded-md px-3 py-2 transition-colors hover:text-black"
-        style={{ color: 'var(--color-charcoal)' }}
+        className="text-sm font-semibold rounded-full px-3.5 py-1.5 transition-colors hover:text-ink/70 text-ink"
       >
         Log in
       </Link>
-      <Link
+      <PillButton
+        variant="primary"
+        size="sm"
         href="/signup"
-        className="text-sm font-semibold rounded-full px-4 py-2 transition-colors hover:brightness-105"
-        style={{
-          backgroundColor: 'var(--color-sage)',
-          color: '#1F1F1F',
-        }}
       >
-        Sign up
-      </Link>
+        Create free account
+      </PillButton>
     </div>
   );
 }
-
