@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { learningCurve } from "@/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LOOP — Learn it. Loop it. Make it.",
+  title: "loop — Learn it. Loop it. Make it.",
   description:
-    "LOOP is a crochet learning platform with three connected learning modes: embedded video, written patterns, and guided steps.",
+    "loop is a crochet learning platform with three connected learning modes: embedded video, written patterns, and guided steps.",
 };
 
 export default function RootLayout({
@@ -13,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className={`h-full ${learningCurve.variable}`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

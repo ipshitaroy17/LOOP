@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import HowItWorks from "@/components/HowItWorks";
 import AuthNav from "@/components/AuthNav";
+import Brand from "@/components/Brand";
 
 function AuthNavFallback() {
   return (
@@ -47,13 +48,7 @@ export default function Home() {
         className="w-full px-6 py-5 flex items-center justify-between"
         style={{ backgroundColor: "var(--color-cream)" }}
       >
-        <span
-          className="text-2xl font-bold tracking-tight"
-          style={{ color: "var(--color-charcoal)" }}
-          aria-label="LOOP"
-        >
-          LOOP
-        </span>
+        <Brand size="nav" style={{ color: "var(--color-charcoal)" }} aria-label="loop" />
 
         <nav aria-label="Page navigation" className="flex items-center gap-2 sm:gap-4">
           <Link
@@ -68,7 +63,7 @@ export default function Home() {
             className="text-sm font-medium rounded-md px-3 py-2 transition-colors hidden sm:inline"
             style={{ color: "var(--color-sage)" }}
           >
-            How LOOP works
+            How <Brand size="inherit" /> works
           </a>
 
           <Suspense fallback={<AuthNavFallback />}>
@@ -85,13 +80,13 @@ export default function Home() {
           style={{ backgroundColor: "var(--color-cream)" }}
         >
           {/* Wordmark */}
-          <p
-            className="text-7xl font-black tracking-tighter mb-5 leading-none"
+          <Brand
+            as="p"
+            size="hero"
+            className="mb-5"
             style={{ color: "var(--color-charcoal)" }}
-            aria-label="LOOP"
-          >
-            LOOP
-          </p>
+            aria-label="loop"
+          />
 
           {/* Tagline */}
           <h1
@@ -107,7 +102,7 @@ export default function Home() {
             className="text-lg max-w-lg mb-10 leading-relaxed"
             style={{ color: "var(--color-charcoal-soft)" }}
           >
-            LOOP is a crochet learning platform that connects video,
+            <Brand size="inherit" /> is a crochet learning platform that connects video,
             written patterns, and guided steps into one seamless experience —
             so you can learn at your pace, your way.
           </p>
@@ -122,7 +117,7 @@ export default function Home() {
                 color: "#1F1F1F",
               }}
             >
-              How LOOP works
+              How <Brand size="inherit" /> works
             </a>
             <Link
               href="/signup"
@@ -149,7 +144,7 @@ export default function Home() {
           }}
         >
           <p>
-            LOOP is in active development.{" "}
+            <Brand size="inherit" /> is in active development.{" "}
             <span
               className="inline-block rounded-md px-2 py-0.5 text-xs font-medium"
               style={{

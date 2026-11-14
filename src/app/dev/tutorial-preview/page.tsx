@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Brand from '@/components/Brand';
 import { buildWatchUrl } from '@/lib/youtube/parseVideoId';
 
 /**
@@ -66,11 +67,10 @@ export default function TutorialPreviewIndexPage() {
       >
         <Link
           href="/"
-          className="text-2xl font-bold tracking-tight"
-          style={{ color: 'var(--color-charcoal)' }}
-          aria-label="LOOP Home"
+          className="inline-flex items-center"
+          aria-label="loop Home"
         >
-          LOOP
+          <Brand size="nav" style={{ color: 'var(--color-charcoal)' }} />
         </Link>
         <span className="ml-4 text-sm font-medium" style={{ color: 'var(--color-charcoal-soft)' }}>
           / Dev: Tutorial Previews (Video, Guided &amp; Written)
@@ -243,7 +243,7 @@ export default function TutorialPreviewIndexPage() {
         className="w-full px-6 py-8 border-t border-black/5 text-center text-xs"
         style={{ backgroundColor: 'var(--color-cream)', color: 'var(--color-charcoal-soft)' }}
       >
-        <p>LOOP &bull; Development preview — not publicly accessible.</p>
+        <p><Brand size="inherit" /> &bull; Development preview — not publicly accessible.</p>
       </footer>
     </div>
   );

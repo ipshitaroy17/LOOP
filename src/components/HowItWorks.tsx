@@ -1,27 +1,38 @@
+import Brand from "@/components/Brand";
+
 const modes = [
   {
     emoji: "▶",
     emojiLabel: "play button",
     title: "Watch",
     colour: "bg-[#F5D87E]", // butter
-    description:
-      "Follow a curated project video at your own pace. Pause, rewind, and re-watch any step as many times as you need — no pressure, no timer.",
+    description: (
+      <>
+        Follow a curated project video at your own pace. Pause, rewind, and re-watch any step as many times as you need — no pressure, no timer.
+      </>
+    ),
   },
   {
     emoji: "📄",
     emojiLabel: "document",
     title: "Read",
     colour: "bg-[#C3B1D4]", // lilac
-    description:
-      "Read the full written pattern in clear US crochet terminology. Every abbreviation is explained, so you always know exactly what a stitch means.",
+    description: (
+      <>
+        Read the full written pattern in clear US crochet terminology. Every abbreviation is explained, so you always know exactly what a stitch means.
+      </>
+    ),
   },
   {
     emoji: "✦",
     emojiLabel: "star",
     title: "Follow",
     colour: "bg-[#E8B4B8]", // pink
-    description:
-      "Work through the pattern one step at a time with guided prompts. Mark each step done yourself — LOOP never marks a step complete on your behalf.",
+    description: (
+      <>
+        Work through the pattern one step at a time with guided prompts. Mark each step done yourself — <Brand size="inherit" /> never marks a step complete on your behalf.
+      </>
+    ),
   },
 ];
 
@@ -38,13 +49,13 @@ export default function HowItWorks() {
           className="text-3xl font-bold text-center mb-4"
           style={{ color: "var(--color-charcoal)" }}
         >
-          How LOOP works
+          How <Brand size="inherit" /> works
         </h2>
         <p
           className="text-center max-w-xl mx-auto mb-14 text-lg"
           style={{ color: "var(--color-charcoal-soft)" }}
         >
-          Every project in LOOP has three connected learning modes. Switch
+          Every project in <Brand size="inherit" /> has three connected learning modes. Switch
           between them freely — they all use the same pattern steps, so nothing
           gets out of sync.
         </p>
@@ -71,12 +82,13 @@ export default function HowItWorks() {
               >
                 {title}
               </h3>
-              <p
-                className="text-base leading-relaxed"
+
+              <div
+                className="text-sm leading-relaxed"
                 style={{ color: "var(--color-charcoal-soft)" }}
               >
                 {description}
-              </p>
+              </div>
             </li>
           ))}
         </ol>

@@ -4,6 +4,7 @@ import { connection } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserSavedProjects } from '@/lib/catalogue/saved-projects';
 import ProjectCard from '@/components/catalogue/ProjectCard';
+import Brand from '@/components/Brand';
 
 // Allow blocking route for runtime cookies authentication
 export const instant = false;
@@ -47,11 +48,10 @@ export default async function MyProjectsPage() {
         <div className="flex items-center gap-6">
           <Link
             href="/"
-            className="text-2xl font-bold tracking-tight"
-            style={{ color: 'var(--color-charcoal)' }}
-            aria-label="LOOP Home"
+            className="inline-flex items-center"
+            aria-label="loop Home"
           >
-            LOOP
+            <Brand size="nav" style={{ color: 'var(--color-charcoal)' }} />
           </Link>
 
           <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-2 sm:gap-3 text-sm font-medium">
@@ -245,7 +245,7 @@ export default async function MyProjectsPage() {
         }}
       >
         <p>
-          LOOP &bull; Your personal crochet learning space.
+          <Brand size="inherit" /> &bull; Your personal crochet learning space.
         </p>
       </footer>
     </div>

@@ -4,6 +4,7 @@ import YouTubePlayer from '@/components/tutorial/YouTubePlayer';
 import WrittenInstructions from '@/components/tutorial/WrittenInstructions';
 import GuidedSteps from '@/components/tutorial/GuidedSteps';
 import TutorialViewSwitcher from '@/components/tutorial/TutorialViewSwitcher';
+import Brand from '@/components/Brand';
 import { buildWatchUrl } from '@/lib/youtube/parseVideoId';
 import {
   BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE,
@@ -112,7 +113,7 @@ const PREVIEW_CANDIDATES: Record<string, PreviewCandidate> = {
     projectSlug: 'beginner-practice-square',
     projectTitle: 'Beginner Practice Square',
     tutorialKey: 'main',
-    creatorName: 'LOOP Curriculum Team',
+    creatorName: 'loop Curriculum Team',
     creatorUrl: null,
     oEmbedTitle: 'Beginner Practice Square: Mastering Single Crochet Swatches',
     videoId: null,
@@ -193,11 +194,10 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
         <div className="flex items-center gap-6">
           <Link
             href="/"
-            className="text-2xl font-bold tracking-tight"
-            style={{ color: 'var(--color-charcoal)' }}
-            aria-label="LOOP Home"
+            className="inline-flex items-center"
+            aria-label="loop Home"
           >
-            LOOP
+            <Brand size="nav" style={{ color: 'var(--color-charcoal)' }} />
           </Link>
           <nav aria-label="Breadcrumb navigation" className="hidden sm:flex items-center gap-2 text-sm">
             <Link
@@ -524,7 +524,7 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
         className="w-full px-6 py-8 border-t border-black/5 text-center text-xs"
         style={{ backgroundColor: 'var(--color-cream)', color: 'var(--color-charcoal-soft)' }}
       >
-        <p>LOOP &bull; Development preview — not publicly accessible.</p>
+        <p><Brand size="inherit" /> &bull; Development preview — not publicly accessible.</p>
       </footer>
     </div>
   );

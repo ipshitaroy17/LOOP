@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import AuthNav from '@/components/AuthNav';
+import Brand from '@/components/Brand';
 import ExploreFilters from '@/components/catalogue/ExploreFilters';
 import ProjectGrid from '@/components/catalogue/ProjectGrid';
 import Pagination from '@/components/catalogue/Pagination';
@@ -90,11 +91,10 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         <div className="flex items-center gap-6">
           <Link
             href="/"
-            className="text-2xl font-bold tracking-tight"
-            style={{ color: 'var(--color-charcoal)' }}
-            aria-label="LOOP Home"
+            className="inline-flex items-center"
+            aria-label="loop Home"
           >
-            LOOP
+            <Brand size="nav" style={{ color: 'var(--color-charcoal)' }} />
           </Link>
 
           <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-4 text-sm font-medium">
@@ -179,7 +179,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         }}
       >
         <p>
-          LOOP Project Catalogue &bull; Starter previews. Step-by-step video and written lessons are in development.
+          <Brand size="inherit" /> Project Catalogue &bull; Starter previews. Step-by-step video and written lessons are in development.
         </p>
       </footer>
     </div>

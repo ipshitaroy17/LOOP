@@ -19,6 +19,7 @@
                "Segoe UI Emoji";
   --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo,
                Consolas, "DejaVu Sans Mono", monospace;
+  --font-script: var(--font-learning-curve), cursive;
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */

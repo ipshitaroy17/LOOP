@@ -50,7 +50,7 @@ export function rankProjectsForUser(
     return {
       isPersonalized: false,
       projects: fallback,
-      reason: 'Browse starter projects from the LOOP catalogue.',
+      reason: 'Browse starter projects from the loop catalogue.',
     };
   }
 
@@ -113,7 +113,7 @@ export function rankProjectsForUser(
     return {
       isPersonalized: false,
       projects: topProjects,
-      reason: 'Browse starter projects from the LOOP catalogue.',
+      reason: 'Browse starter projects from the loop catalogue.',
     };
   }
 

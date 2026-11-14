@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Brand from '@/components/Brand';
 import { signUpAction, type AuthActionResult } from '@/app/auth/actions';
 
 export default function SignUpPage() {
@@ -117,7 +118,7 @@ export default function SignUpPage() {
           </p>
 
           <p className="text-sm mb-8 leading-relaxed" style={{ color: 'var(--color-charcoal-soft)' }}>
-            Please click the link in your email to activate your account. Once verified, you will be able to log in to your LOOP dashboard.
+            Please click the link in your email to activate your account. Once verified, you will be able to log in to your <Brand size="inherit" /> dashboard.
           </p>
 
           <div className="pt-4 border-t border-black/5">
@@ -145,10 +146,10 @@ export default function SignUpPage() {
         <div className="text-center mb-8">
           <Link
             href="/"
-            className="text-2xl font-bold tracking-tight inline-block mb-2"
-            style={{ color: 'var(--color-charcoal)' }}
+            className="inline-block mb-2"
+            aria-label="loop Home"
           >
-            LOOP
+            <Brand size="auth" style={{ color: 'var(--color-charcoal)' }} />
           </Link>
           <h1 className="text-xl font-semibold" style={{ color: 'var(--color-charcoal)' }}>
             Create your account

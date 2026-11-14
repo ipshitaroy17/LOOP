@@ -157,12 +157,12 @@ export const BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE: Tutorial = {
   abbreviations: BEGINNER_PRACTICE_SQUARE_ABBREVIATIONS,
   materialsDetails: BEGINNER_PRACTICE_SQUARE_MATERIALS,
   patternSourceType: 'original_loop',
-  patternSourceTitle: 'LOOP Foundational Single Crochet Practice Swatch',
-  patternSourceAuthor: 'LOOP Curriculum Team',
+  patternSourceTitle: 'loop Foundational Single Crochet Practice Swatch',
+  patternSourceAuthor: 'loop Curriculum Team',
   patternSourceUrl: null,
-  patternLicense: 'LOOP Educational Content - Review Pending',
+  patternLicense: 'loop Educational Content - Review Pending',
   patternPermissionNotes:
-    'Original instructional pattern drafted for LOOP introductory learners. Requires hands-on physical swatch verification and user testing before publication.',
+    'Original instructional pattern drafted for loop introductory learners. Requires hands-on physical swatch verification and user testing before publication.',
   patternTested: false,
   patternTestedNotes:
     'Pending hands-on swatch verification for gauge consistency and row count clarity.',

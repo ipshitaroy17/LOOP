@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Suspense } from 'react';
 import { connection } from 'next/server';
 import AuthNav from '@/components/AuthNav';
+import Brand from '@/components/Brand';
 import { getProjectBySlug } from '@/lib/catalogue/queries';
 import { getCategoryLabel, getDifficultyLabel } from '@/lib/catalogue/categories';
 import { isProjectSavedByUser } from '@/lib/catalogue/saved-projects';
@@ -93,11 +94,10 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
         <div className="flex items-center gap-6">
           <Link
             href="/"
-            className="text-2xl font-bold tracking-tight"
-            style={{ color: 'var(--color-charcoal)' }}
-            aria-label="LOOP Home"
+            className="inline-flex items-center"
+            aria-label="loop Home"
           >
-            LOOP
+            <Brand size="nav" style={{ color: 'var(--color-charcoal)' }} />
           </Link>
 
           <nav aria-label="Breadcrumb navigation" className="flex items-center gap-2 text-sm">
@@ -394,7 +394,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
         }}
       >
         <p>
-          LOOP &bull; Crochet learning at your own pace.
+          <Brand size="inherit" /> &bull; Crochet learning at your own pace.
         </p>
       </footer>
     </div>

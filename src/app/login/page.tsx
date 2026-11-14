@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Brand from '@/components/Brand';
 import { signInAction, type AuthActionResult } from '@/app/auth/actions';
 
 function LoginForm() {
@@ -83,10 +84,10 @@ function LoginForm() {
       <div className="text-center mb-8">
         <Link
           href="/"
-          className="text-2xl font-bold tracking-tight inline-block mb-2"
-          style={{ color: 'var(--color-charcoal)' }}
+          className="inline-block mb-2"
+          aria-label="loop Home"
         >
-          LOOP
+          <Brand size="auth" style={{ color: 'var(--color-charcoal)' }} />
         </Link>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--color-charcoal)' }}>
           Welcome back
