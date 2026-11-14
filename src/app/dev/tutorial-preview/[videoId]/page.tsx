@@ -4,7 +4,7 @@ import YouTubePlayer from '@/components/tutorial/YouTubePlayer';
 import WrittenInstructions from '@/components/tutorial/WrittenInstructions';
 import GuidedSteps from '@/components/tutorial/GuidedSteps';
 import TutorialViewSwitcher from '@/components/tutorial/TutorialViewSwitcher';
-import Brand from '@/components/Brand';
+import Logo from '@/components/Logo';
 import { buildWatchUrl } from '@/lib/youtube/parseVideoId';
 import {
   BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE,
@@ -197,7 +197,7 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
             className="inline-flex items-center"
             aria-label="loop Home"
           >
-            <Brand size="nav" style={{ color: 'var(--color-charcoal)' }} />
+            <Logo size="md" />
           </Link>
           <nav aria-label="Breadcrumb navigation" className="hidden sm:flex items-center gap-2 text-sm">
             <Link
@@ -524,7 +524,7 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
         className="w-full px-6 py-8 border-t border-black/5 text-center text-xs"
         style={{ backgroundColor: 'var(--color-cream)', color: 'var(--color-charcoal-soft)' }}
       >
-        <p><Brand size="inherit" /> &bull; Development preview — not publicly accessible.</p>
+        <p>loop &bull; Development preview — not publicly accessible.</p>
       </footer>
     </div>
   );

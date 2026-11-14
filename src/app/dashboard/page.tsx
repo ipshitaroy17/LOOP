@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import Link from 'next/link';
-import Brand from '@/components/Brand';
+import Logo from '@/components/Logo';
 import type { OnboardingPreferences, MultipleAnswer, SingleAnswer } from '@/lib/onboarding/types';
 import SuggestedProjects from '@/components/catalogue/SuggestedProjects';
 import { getPublishedProjects } from '@/lib/catalogue/queries';
@@ -109,7 +109,7 @@ export default async function DashboardPage() {
           className="inline-flex items-center"
           aria-label="loop Home"
         >
-          <Brand size="nav" style={{ color: 'var(--color-charcoal)' }} />
+          <Logo size="md" />
         </Link>
 
         <nav aria-label="Dashboard navigation" className="flex items-center gap-3">

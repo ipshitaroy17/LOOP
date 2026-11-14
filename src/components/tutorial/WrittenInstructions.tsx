@@ -1,5 +1,4 @@
 import type { MaterialItem, PatternStep } from '@/lib/tutorials/types';
-import Brand from '@/components/Brand';
 
 export interface WrittenInstructionsProps {
   terminology: string;
@@ -321,7 +320,7 @@ export default function WrittenInstructions({
               {patternSourceAuthor && <> by {patternSourceAuthor}</>}.
             </>
           ) : (
-            <><Brand size="inherit" /> Educational Pattern Curriculum.</>
+            <>loop Educational Pattern Curriculum.</>
           )}
           {patternLicense && <> Licensed under {patternLicense}.</>}
         </p>

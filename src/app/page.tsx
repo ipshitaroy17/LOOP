@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import HowItWorks from "@/components/HowItWorks";
 import AuthNav from "@/components/AuthNav";
-import Brand from "@/components/Brand";
+import Logo from "@/components/Logo";
 
 function AuthNavFallback() {
   return (
@@ -48,22 +48,22 @@ export default function Home() {
         className="w-full px-6 py-5 flex items-center justify-between"
         style={{ backgroundColor: "var(--color-cream)" }}
       >
-        <Brand size="nav" style={{ color: "var(--color-charcoal)" }} aria-label="loop" />
+        <Logo size="md" />
 
         <nav aria-label="Page navigation" className="flex items-center gap-2 sm:gap-4">
           <Link
             href="/explore"
             className="text-sm font-medium rounded-md px-3 py-2 transition-colors hover:underline"
-            style={{ color: "var(--color-charcoal)" }}
+            style={{ color: "var(--color-ink)" }}
           >
             Explore
           </Link>
           <a
             href="#how-it-works"
             className="text-sm font-medium rounded-md px-3 py-2 transition-colors hidden sm:inline"
-            style={{ color: "var(--color-sage)" }}
+            style={{ color: "var(--color-sage-dark)" }}
           >
-            How <Brand size="inherit" /> works
+            How loop works
           </a>
 
           <Suspense fallback={<AuthNavFallback />}>
@@ -80,29 +80,25 @@ export default function Home() {
           style={{ backgroundColor: "var(--color-cream)" }}
         >
           {/* Wordmark */}
-          <Brand
-            as="p"
-            size="hero"
-            className="mb-5"
-            style={{ color: "var(--color-charcoal)" }}
-            aria-label="loop"
-          />
+          <div className="mb-6">
+            <Logo size="xl" />
+          </div>
 
           {/* Tagline */}
           <h1
             id="hero-heading"
-            className="text-2xl font-semibold mb-6 max-w-md"
-            style={{ color: "var(--color-sage)" }}
+            className="text-3xl sm:text-4xl font-display font-bold mb-6 max-w-md"
+            style={{ color: "var(--color-ink)" }}
           >
             Learn it. Loop it. Make it.
           </h1>
 
           {/* One-line description */}
           <p
-            className="text-lg max-w-lg mb-10 leading-relaxed"
+            className="text-lg max-w-lg mb-10 leading-relaxed font-body"
             style={{ color: "var(--color-charcoal-soft)" }}
           >
-            <Brand size="inherit" /> is a crochet learning platform that connects video,
+            loop is a crochet learning platform that connects video,
             written patterns, and guided steps into one seamless experience —
             so you can learn at your pace, your way.
           </p>
@@ -114,16 +110,16 @@ export default function Home() {
               className="inline-block rounded-full px-8 py-3 text-base font-semibold transition-colors hover:brightness-105"
               style={{
                 backgroundColor: "var(--color-sage)",
-                color: "#1F1F1F",
+                color: "#2E2A36",
               }}
             >
-              How <Brand size="inherit" /> works
+              How loop works
             </a>
             <Link
               href="/signup"
-              className="inline-block rounded-full px-8 py-3 text-base font-semibold border border-black/10 transition-colors hover:bg-black/5"
+              className="inline-block rounded-full px-8 py-3 text-base font-semibold border border-ink/20 transition-colors hover:bg-black/5"
               style={{
-                color: "var(--color-charcoal)",
+                color: "var(--color-ink)",
                 backgroundColor: "var(--color-white)",
               }}
             >
@@ -137,19 +133,19 @@ export default function Home() {
 
         {/* ── Footer note ─────────────────────────────────────────────── */}
         <footer
-          className="w-full px-6 py-8 text-center text-sm"
+          className="w-full px-6 py-8 text-center text-sm font-body"
           style={{
             backgroundColor: "var(--color-cream)",
             color: "var(--color-charcoal-soft)",
           }}
         >
           <p>
-            <Brand size="inherit" /> is in active development.{" "}
+            loop is in active development.{" "}
             <span
               className="inline-block rounded-md px-2 py-0.5 text-xs font-medium"
               style={{
                 backgroundColor: "var(--color-butter)",
-                color: "var(--color-charcoal)",
+                color: "var(--color-ink)",
               }}
             >
               Day 6 — save projects &amp; my projects

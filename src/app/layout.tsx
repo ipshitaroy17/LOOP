@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { learningCurve } from "@/fonts";
+import { fraunces, nunito } from "@/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`h-full ${learningCurve.variable}`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`h-full ${fraunces.variable} ${nunito.variable}`}>
+      <body className="min-h-full flex flex-col font-body">{children}</body>
     </html>
   );
 }

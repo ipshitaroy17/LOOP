@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import AuthNav from '@/components/AuthNav';
-import Brand from '@/components/Brand';
+import Logo from '@/components/Logo';
 import ExploreFilters from '@/components/catalogue/ExploreFilters';
 import ProjectGrid from '@/components/catalogue/ProjectGrid';
 import Pagination from '@/components/catalogue/Pagination';
@@ -94,7 +94,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
             className="inline-flex items-center"
             aria-label="loop Home"
           >
-            <Brand size="nav" style={{ color: 'var(--color-charcoal)' }} />
+            <Logo size="md" />
           </Link>
 
           <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-4 text-sm font-medium">
@@ -179,7 +179,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         }}
       >
         <p>
-          <Brand size="inherit" /> Project Catalogue &bull; Starter previews. Step-by-step video and written lessons are in development.
+          loop Project Catalogue &bull; Starter previews. Step-by-step video and written lessons are in development.
         </p>
       </footer>
     </div>

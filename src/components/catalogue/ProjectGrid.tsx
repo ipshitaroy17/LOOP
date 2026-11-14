@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import ProjectCard from './ProjectCard';
-import Brand from '@/components/Brand';
 import type { Project } from '@/lib/catalogue/types';
 
 interface ProjectGridProps {
@@ -118,7 +117,7 @@ export default function ProjectGrid({
           className="text-sm max-w-md mx-auto leading-relaxed"
           style={{ color: 'var(--color-charcoal-soft)' }}
         >
-          The <Brand size="inherit" /> crochet project catalogue is currently getting ready. Starter projects will appear here once published.
+          The loop crochet project catalogue is currently getting ready. Starter projects will appear here once published.
         </p>
       </div>
     );

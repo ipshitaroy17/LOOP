@@ -1,7 +1,0 @@
-Font: Learning Curve Pro Regular
-Designer: Jess Latham
-Foundry: Blue Vinyl Fonts (http://www.bvfonts.com/)
-Copyright: Copyright (c) 2007 by Blue Vinyl Fonts. All rights reserved.
-License: Free for personal and commercial use (distributed via Font Squirrel / Blue Vinyl Fonts).
-Webfont conversion: Font Squirrel Webfont Generator / taschetto.
-Provided formats: .woff2, .woff

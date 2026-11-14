@@ -11,7 +11,7 @@ import YouTubePlayer from '@/components/tutorial/YouTubePlayer';
 import WrittenInstructions from '@/components/tutorial/WrittenInstructions';
 import GuidedSteps from '@/components/tutorial/GuidedSteps';
 import TutorialViewSwitcher from '@/components/tutorial/TutorialViewSwitcher';
-import Brand from '@/components/Brand';
+import Logo from '@/components/Logo';
 import { parseYouTubeVideoId, buildWatchUrl } from '@/lib/youtube/parseVideoId';
 
 export const instant = false;
@@ -131,7 +131,7 @@ export default async function TutorialDetailPage({ params, searchParams }: Tutor
             className="inline-flex items-center"
             aria-label="loop Home"
           >
-            <Brand size="nav" style={{ color: 'var(--color-charcoal)' }} />
+            <Logo size="md" />
           </Link>
 
           <nav aria-label="Breadcrumb navigation" className="hidden sm:flex items-center gap-2 text-sm">
@@ -582,7 +582,7 @@ export default async function TutorialDetailPage({ params, searchParams }: Tutor
           color: 'var(--color-charcoal-soft)',
         }}
       >
-        <p><Brand size="inherit" /> &bull; Crochet learning at your own pace.</p>
+        <p>loop &bull; Crochet learning at your own pace.</p>
       </footer>
     </div>
   );

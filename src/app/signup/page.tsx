@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Brand from '@/components/Brand';
+import Logo from '@/components/Logo';
 import { signUpAction, type AuthActionResult } from '@/app/auth/actions';
 
 export default function SignUpPage() {
@@ -118,7 +118,7 @@ export default function SignUpPage() {
           </p>
 
           <p className="text-sm mb-8 leading-relaxed" style={{ color: 'var(--color-charcoal-soft)' }}>
-            Please click the link in your email to activate your account. Once verified, you will be able to log in to your <Brand size="inherit" /> dashboard.
+            Please click the link in your email to activate your account. Once verified, you will be able to log in to your loop dashboard.
           </p>
 
           <div className="pt-4 border-t border-black/5">
@@ -149,7 +149,7 @@ export default function SignUpPage() {
             className="inline-block mb-2"
             aria-label="loop Home"
           >
-            <Brand size="auth" style={{ color: 'var(--color-charcoal)' }} />
+            <Logo size="lg" />
           </Link>
           <h1 className="text-xl font-semibold" style={{ color: 'var(--color-charcoal)' }}>
             Create your account
