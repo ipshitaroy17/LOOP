@@ -73,7 +73,7 @@ export default function TutorialPreviewIndexPage() {
           LOOP
         </Link>
         <span className="ml-4 text-sm font-medium" style={{ color: 'var(--color-charcoal-soft)' }}>
-          / Dev: Tutorial Previews (Video &amp; Written)
+          / Dev: Tutorial Previews (Video, Guided &amp; Written)
         </span>
       </header>
 
@@ -87,25 +87,25 @@ export default function TutorialPreviewIndexPage() {
           </h1>
           <p className="text-sm text-gray-600">
             All records below are in draft status (<code className="bg-black/5 px-1 rounded">review_status = &apos;draft&apos;</code>).
-            Public routes strictly 404. These preview pages use isolated local fixtures to test player playback and written instructions components.
+            Public routes strictly 404. These preview pages use isolated local fixtures to test player playback, guided steps, and written instructions components.
           </p>
         </div>
 
-        {/* ── Section 1: Written Instructions Candidate (Day 9 Focus) ─── */}
+        {/* ── Section 1: Guided & Written Instructions Candidate (Day 9 & 10 Focus) ─── */}
         <section aria-labelledby="written-drafts-heading">
           <div className="flex items-center gap-2 mb-4">
             <span
               className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider"
               style={{ backgroundColor: 'rgba(124, 154, 107, 0.2)', color: 'var(--color-sage-dark)' }}
             >
-              Day 9 Feature
+              Day 10 Feature
             </span>
             <h2
               id="written-drafts-heading"
               className="text-lg font-bold"
               style={{ color: 'var(--color-charcoal)' }}
             >
-              Written Instructions Draft Candidate
+              Interactive Steps Draft Candidate
             </h2>
           </div>
 
@@ -114,7 +114,7 @@ export default function TutorialPreviewIndexPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-900">
-                    5 Written Steps
+                    5 Steps
                   </span>
                   <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-gray-100 text-gray-700">
                     5 Materials
@@ -128,17 +128,23 @@ export default function TutorialPreviewIndexPage() {
                 </h3>
                 <p className="text-xs text-gray-600 mt-1 leading-relaxed">
                   Project: Beginner Practice Square &bull; Fixture mirrors <code className="bg-gray-100 px-1 rounded">02_beginner_square_tutorial.sql</code>.
-                  Tests materials list, stitch glossary, stitch count badges, and tip callouts.
+                  Tests Guided one-step-at-a-time navigation, Written full list, and materials/glossary drawers.
                 </p>
               </div>
 
-              <div className="flex items-center gap-2.5 shrink-0">
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                 <Link
-                  href="/dev/tutorial-preview/beginner-practice-square?view=written"
+                  href="/dev/tutorial-preview/beginner-practice-square?view=guided"
                   className="px-5 py-2.5 rounded-full text-xs font-semibold shadow-sm transition-all hover:brightness-105"
                   style={{ backgroundColor: 'var(--color-sage)', color: '#1F1F1F' }}
                 >
-                  Test Written Steps &rarr;
+                  Test Guided Steps &rarr;
+                </Link>
+                <Link
+                  href="/dev/tutorial-preview/beginner-practice-square?view=written"
+                  className="px-4 py-2.5 rounded-full text-xs font-semibold border border-black/10 transition-colors hover:bg-black/5"
+                >
+                  Written Steps
                 </Link>
               </div>
             </div>
@@ -178,7 +184,7 @@ export default function TutorialPreviewIndexPage() {
                       by {c.creatorName} &bull; <span className="font-mono">{c.videoId}</span>
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
                     <a
                       href={buildWatchUrl(c.videoId)}
                       target="_blank"
@@ -190,13 +196,20 @@ export default function TutorialPreviewIndexPage() {
                     </a>
                     <Link
                       href={`/dev/tutorial-preview/${c.videoId}?view=video`}
-                      className="px-4 py-1.5 rounded-full text-xs font-semibold border border-black/10 transition-all hover:bg-black/5"
+                      className="px-3.5 py-1.5 rounded-full text-xs font-semibold border border-black/10 transition-all hover:bg-black/5"
                     >
                       Video
                     </Link>
                     <Link
+                      href={`/dev/tutorial-preview/${c.videoId}?view=guided`}
+                      className="px-3.5 py-1.5 rounded-full text-xs font-semibold border border-black/10 transition-all hover:bg-black/5"
+                      title="Test empty guided steps state (Coming soon)"
+                    >
+                      Guided
+                    </Link>
+                    <Link
                       href={`/dev/tutorial-preview/${c.videoId}?view=written`}
-                      className="px-4 py-1.5 rounded-full text-xs font-semibold transition-all hover:brightness-105"
+                      className="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all hover:brightness-105"
                       style={{ backgroundColor: 'var(--color-sage)', color: '#1F1F1F' }}
                       title="Test empty written instructions state (Coming Soon)"
                     >

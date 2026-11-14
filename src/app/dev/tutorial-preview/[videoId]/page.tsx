@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import YouTubePlayer from '@/components/tutorial/YouTubePlayer';
 import WrittenInstructions from '@/components/tutorial/WrittenInstructions';
+import GuidedSteps from '@/components/tutorial/GuidedSteps';
 import TutorialViewSwitcher from '@/components/tutorial/TutorialViewSwitcher';
 import { buildWatchUrl } from '@/lib/youtube/parseVideoId';
 import {
@@ -9,10 +10,10 @@ import {
 } from '@/lib/tutorials/fixtures/beginner-square-fixture';
 
 /**
- * DEV-ONLY Tutorial Video & Written Preview
- * ==========================================
+ * DEV-ONLY Tutorial Video, Written & Guided Preview
+ * =================================================
  * This route is permanently disabled in production.
- * It allows local testing of the YouTubePlayer and WrittenInstructions
+ * It allows local testing of the YouTubePlayer, WrittenInstructions, and GuidedSteps
  * components against known draft candidates WITHOUT fetching private draft
  * database records or bypassing RLS.
  *
@@ -22,7 +23,7 @@ import {
  *   AXJpyGLFleM  — Hooked by Robin: Solid Granny Square (seamless)
  *   T7LxrBtpAXM  — Hooked by Robin: Sunburst Granny Square
  *
- * Allowlisted written fixture (the 5 draft steps seeded in 02_beginner_square_tutorial.sql):
+ * Allowlisted written/guided fixture (the 5 draft steps seeded in 02_beginner_square_tutorial.sql):
  *   beginner-practice-square — LOOP Foundational Single Crochet Swatch
  *
  * Public draft tutorial routes continue to return 404 (enforced by RLS + route gate).
@@ -154,20 +155,23 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
     : {};
   const hasSteps = steps.length > 0;
 
-  // View state from query params (?view=video | ?view=written)
-  // Default to 'written' for the written fixture; default to 'video' for the video candidates.
+  // View state from query params (?view=video | ?view=written | ?view=guided)
+  // Default to 'guided' for written fixture with steps; default to 'video' for video candidates.
   const rawView = resolvedSearchParams.view;
-  const activeView: 'video' | 'written' =
-    rawView === 'written'
+  const activeView: 'video' | 'written' | 'guided' =
+    rawView === 'guided'
+      ? 'guided'
+      : rawView === 'written'
       ? 'written'
       : rawView === 'video'
-        ? 'video'
-        : isWrittenFixture
-          ? 'written'
-          : 'video';
+      ? 'video'
+      : isWrittenFixture
+      ? 'guided'
+      : 'video';
 
   const videoHref = `/dev/tutorial-preview/${videoId}?view=video`;
   const writtenHref = `/dev/tutorial-preview/${videoId}?view=written`;
+  const guidedHref = `/dev/tutorial-preview/${videoId}?view=guided`;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-cream)' }}>
@@ -246,7 +250,7 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
             </svg>
           </div>
           <div className="text-xs text-amber-900 leading-relaxed">
-            <p className="font-semibold mb-0.5">Unreviewed draft candidate ({isWrittenFixture ? 'Written Instructions' : 'Video'})</p>
+            <p className="font-semibold mb-0.5">Unreviewed draft candidate ({isWrittenFixture ? 'Guided / Written Steps' : 'Video'})</p>
             <p>
               This content is stored as{' '}
               <code className="bg-amber-100 px-1 rounded">review_status = &apos;draft&apos;</code>{' '}
@@ -313,7 +317,7 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
               style={{ color: 'var(--color-charcoal)', borderColor: 'rgba(0,0,0,0.12)' }}
             >
               <svg className="w-4 h-4 text-red-600 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
               </svg>
               Open on YouTube
             </a>
@@ -326,6 +330,7 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
             activeView={activeView}
             videoHref={videoHref}
             writtenHref={writtenHref}
+            guidedHref={guidedHref}
             hasVideo={hasVideo}
             hasSteps={hasSteps}
             stepsCount={steps.length}
@@ -389,15 +394,23 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
                       No video recorded for this draft lesson
                     </h2>
                     <p className="text-xs sm:text-sm text-gray-600 mb-4">
-                      The Beginner Practice Square is currently drafted as structured written instructions. Switch to the Written Instructions tab to view the 5 drafted steps.
+                      The Beginner Practice Square is drafted with 5 structured steps. Switch to Guided Steps or Written Instructions to follow along.
                     </p>
-                    <Link
-                      href={writtenHref}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-all hover:brightness-105"
-                      style={{ backgroundColor: 'var(--color-sage)', color: '#1F1F1F' }}
-                    >
-                      View Written Instructions &rarr;
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Link
+                        href={guidedHref}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-all hover:brightness-105"
+                        style={{ backgroundColor: 'var(--color-sage)', color: '#1F1F1F' }}
+                      >
+                        Open Guided Steps &rarr;
+                      </Link>
+                      <Link
+                        href={writtenHref}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold border border-black/10 transition-all hover:bg-black/5"
+                      >
+                        View Written Instructions
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </section>
@@ -405,7 +418,19 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
           </div>
         )}
 
-        {/* Panel 2: Written View */}
+        {/* Panel 2: Guided Steps View */}
+        {activeView === 'guided' && (
+          <div id="panel-guided" role="tabpanel" aria-labelledby="tab-guided">
+            <GuidedSteps
+              steps={steps}
+              terminology={meta.terminology}
+              abbreviations={abbreviations}
+              materialsDetails={materialsDetails}
+            />
+          </div>
+        )}
+
+        {/* Panel 3: Written View */}
         {activeView === 'written' && (
           <div id="panel-written" role="tabpanel" aria-labelledby="tab-written">
             {/* Reuses the exact same WrittenInstructions component used in public pages */}
@@ -436,34 +461,39 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
         {/* Review checklist */}
         <section className="mt-12 bg-white rounded-3xl p-6 sm:p-8 border border-black/5 shadow-sm">
           <h2 className="text-base sm:text-lg font-bold mb-4" style={{ color: 'var(--color-charcoal)' }}>
-            Day 9 Written Instructions UI Checklist
+            Day 10 Guided Steps UI Checklist
           </h2>
           <ul className="space-y-3 text-xs sm:text-sm text-gray-700">
             {[
               {
-                label: 'Written Steps Ordered',
+                label: 'Step Progression & Display',
                 detail:
-                  'Steps are sequentially ordered by step_number (1 to 5). Each step has title, stitch count, clear instruction, and maker tip.',
+                  'Displays "Step X of Y", step title, instructions, stitch count badge, and maker tip when present.',
               },
               {
-                label: 'Materials Details',
+                label: 'Local Navigation Controls',
                 detail:
-                  'Materials list shows category badges, items, quantities, and hook recommendations from the tutorial fixture.',
+                  'Previous button disabled on step 1. Next button advances until final step. Final step displays "Last step" status without persisting completion.',
               },
               {
-                label: 'Abbreviations Glossary',
+                label: 'Back to First Step',
                 detail:
-                  'Glossary displays stitch abbreviations (ch, sc, st, sl st, yo, tch) clearly labeled with terminology mode.',
+                  'On the final step, a "Back to first step" control resets back to step 1.',
+              },
+              {
+                label: 'Reference Access',
+                detail:
+                  'Collapsible Materials, Tools & Abbreviations drawer is accessible directly within Guided mode.',
+              },
+              {
+                label: 'Learning Mode Switcher',
+                detail:
+                  'Three-way switcher (?view=video | ?view=guided | ?view=written) preserves parameters and survives page reloads.',
               },
               {
                 label: 'Empty State (Honest Availability)',
                 detail:
-                  'On the 4 granny square video candidates, switching to Written Instructions shows the honest "Coming Soon" card without fake steps.',
-              },
-              {
-                label: 'View State in URL',
-                detail:
-                  'The URL retains ?view=written or ?view=video, surviving browser reload and back/forward navigation.',
+                  'On the 4 granny square candidates (which have no written steps), Guided Steps shows the honest "Coming soon" notice.',
               },
               {
                 label: 'Production Inaccessibility',

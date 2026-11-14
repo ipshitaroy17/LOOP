@@ -9,6 +9,7 @@ import { isProjectSavedByUser } from '@/lib/catalogue/saved-projects';
 import SaveButton from '@/components/catalogue/SaveButton';
 import YouTubePlayer from '@/components/tutorial/YouTubePlayer';
 import WrittenInstructions from '@/components/tutorial/WrittenInstructions';
+import GuidedSteps from '@/components/tutorial/GuidedSteps';
 import TutorialViewSwitcher from '@/components/tutorial/TutorialViewSwitcher';
 import { parseYouTubeVideoId, buildWatchUrl } from '@/lib/youtube/parseVideoId';
 
@@ -87,14 +88,22 @@ export default async function TutorialDetailPage({ params, searchParams }: Tutor
   const steps = currentTutorial.steps || [];
   const hasSteps = steps.length > 0;
 
-  // View selection from URL search params (?view=video | ?view=written)
+  // View selection from URL search params (?view=video | ?view=written | ?view=guided)
   // Default to 'video' if video exists; otherwise default to 'written'.
   const rawView = typeof resolvedSearchParams.view === 'string' ? resolvedSearchParams.view : '';
-  const activeView: 'video' | 'written' =
-    rawView === 'written' ? 'written' : rawView === 'video' ? 'video' : hasVideo ? 'video' : 'written';
+  const activeView: 'video' | 'written' | 'guided' =
+    rawView === 'guided'
+      ? 'guided'
+      : rawView === 'written'
+      ? 'written'
+      : rawView === 'video'
+      ? 'video'
+      : hasVideo
+      ? 'video'
+      : 'written';
 
   // URL builders for view tabs and sibling switcher, preserving query parameters
-  function buildViewHref(targetView: 'video' | 'written') {
+  function buildViewHref(targetView: 'video' | 'written' | 'guided') {
     const p = new URLSearchParams(queryParams);
     p.set('view', targetView);
     return `/projects/${currentProject.slug}/tutorials/${currentTutorial.tutorialKey}?${p.toString()}`;
@@ -310,12 +319,13 @@ export default async function TutorialDetailPage({ params, searchParams }: Tutor
           </section>
         )}
 
-        {/* ── Learning Mode Switcher (Video vs Written Instructions) ──────── */}
+        {/* ── Learning Mode Switcher (Video vs Guided vs Written Instructions) ── */}
         <div className="mb-8">
           <TutorialViewSwitcher
             activeView={activeView}
             videoHref={buildViewHref('video')}
             writtenHref={buildViewHref('written')}
+            guidedHref={buildViewHref('guided')}
             hasVideo={hasVideo || hasVideoUrlButNotAllowed}
             hasSteps={hasSteps}
             stepsCount={steps.length}
@@ -442,43 +452,60 @@ export default async function TutorialDetailPage({ params, searchParams }: Tutor
                       No video lesson for this tutorial
                     </h2>
                     <p className="text-xs sm:text-sm text-gray-600 mb-4">
-                      This lesson is designed as step-by-step written instructions. Switch to the written instructions view to follow along.
+                      This lesson is designed with structured instructions. Switch to Guided Steps or Written Instructions to follow along.
                     </p>
-                    <Link
-                      href={buildViewHref('written')}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-all hover:brightness-105"
-                      style={{ backgroundColor: 'var(--color-sage)', color: '#1F1F1F' }}
-                    >
-                      Open Written Instructions &rarr;
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Link
+                        href={buildViewHref('guided')}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-all hover:brightness-105"
+                        style={{ backgroundColor: 'var(--color-sage)', color: '#1F1F1F' }}
+                      >
+                        Try Guided Steps &rarr;
+                      </Link>
+                      <Link
+                        href={buildViewHref('written')}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold border border-black/10 transition-all hover:bg-black/5"
+                      >
+                        Open Written Instructions
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </section>
             )}
 
-            {/* Quick cross-link to written instructions if available */}
+            {/* Quick cross-link to guided / written if available */}
             {hasSteps && (
-              <div className="p-5 rounded-2xl bg-white border border-black/5 flex items-center justify-between gap-4">
+              <div className="p-5 rounded-2xl bg-white border border-black/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold text-gray-900">Prefer reading the written steps?</p>
+                  <p className="text-sm font-bold text-gray-900">Want step-by-step crochet guidance?</p>
                   <p className="text-xs text-gray-600 mt-0.5">
-                    View materials, stitch abbreviations, and {steps.length} detailed rows.
+                    Follow {steps.length} interactive steps with stitch counts and tips.
                   </p>
                 </div>
-                <Link
-                  href={buildViewHref('written')}
-                  className="px-4 py-2 rounded-full text-xs font-semibold border border-black/10 transition-colors hover:bg-black/5 shrink-0"
-                >
-                  View Steps &rarr;
-                </Link>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    href={buildViewHref('guided')}
+                    className="px-4 py-2 rounded-full text-xs font-semibold shadow-sm transition-all hover:brightness-105"
+                    style={{ backgroundColor: 'var(--color-sage)', color: '#1F1F1F' }}
+                  >
+                    Start Guided Steps &rarr;
+                  </Link>
+                  <Link
+                    href={buildViewHref('written')}
+                    className="px-4 py-2 rounded-full text-xs font-semibold border border-black/10 transition-colors hover:bg-black/5"
+                  >
+                    View All Steps
+                  </Link>
+                </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Panel 2: Written Instructions View */}
-        {activeView === 'written' && (
-          <div id="panel-written" role="tabpanel" aria-labelledby="tab-written" className="space-y-6">
+        {/* Panel 2: Guided Steps View */}
+        {activeView === 'guided' && (
+          <div id="panel-guided" role="tabpanel" aria-labelledby="tab-guided" className="space-y-6">
             {/* Quick cross-link to video if available */}
             {hasVideo && (
               <div className="p-4 rounded-2xl bg-white/80 border border-black/5 flex items-center justify-between gap-4 text-xs">
@@ -493,6 +520,45 @@ export default async function TutorialDetailPage({ params, searchParams }: Tutor
                 </Link>
               </div>
             )}
+
+            {/* Reusable Guided Steps Component */}
+            <GuidedSteps
+              key={tutorial.id}
+              steps={steps}
+              terminology={tutorial.terminology}
+              abbreviations={tutorial.abbreviations}
+              materialsDetails={tutorial.materialsDetails}
+            />
+          </div>
+        )}
+
+        {/* Panel 3: Written Instructions View */}
+        {activeView === 'written' && (
+          <div id="panel-written" role="tabpanel" aria-labelledby="tab-written" className="space-y-6">
+            {/* Quick cross-link to guided or video if available */}
+            <div className="p-4 rounded-2xl bg-white/80 border border-black/5 flex flex-wrap items-center justify-between gap-4 text-xs">
+              <span className="text-gray-600">
+                Want one step at a time? Try Guided Steps mode.
+              </span>
+              <div className="flex items-center gap-3">
+                {hasSteps && (
+                  <Link
+                    href={buildViewHref('guided')}
+                    className="font-semibold text-emerald-800 hover:underline shrink-0"
+                  >
+                    Try Guided Steps &rarr;
+                  </Link>
+                )}
+                {hasVideo && (
+                  <Link
+                    href={buildViewHref('video')}
+                    className="font-semibold text-emerald-800 hover:underline shrink-0"
+                  >
+                    Switch to Video &rarr;
+                  </Link>
+                )}
+              </div>
+            </div>
 
             {/* Reusable Written Instructions Component */}
             <WrittenInstructions
