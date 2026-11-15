@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
+import PillButton from '@/components/ui/PillButton';
 import type { OnboardingPreferences, MultipleAnswer, SingleAnswer } from '@/lib/onboarding/types';
 import SuggestedProjects from '@/components/catalogue/SuggestedProjects';
 import { getPublishedProjects } from '@/lib/catalogue/queries';
@@ -47,6 +48,8 @@ export default async function DashboardPage() {
     user.user_metadata?.full_name ||
     user.email?.split('@')[0] ||
     'Crochet Learner';
+
+  const avatarInitial = displayName.trim().charAt(0).toUpperCase() || 'U';
 
   const memberSince = user.created_at
     ? new Date(user.created_at).toLocaleDateString('en-US', {
@@ -98,76 +101,77 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-cream)' }}>
+    <div className="min-h-screen flex flex-col bg-cream text-ink">
       {/* ── Dashboard Navigation Bar ────────────────────────────────────────── */}
-      <header
-        className="w-full px-6 py-5 flex items-center justify-between border-b border-black/5"
-        style={{ backgroundColor: 'var(--color-cream)' }}
-      >
-        <Link
-          href="/"
-          className="inline-flex items-center"
-          aria-label="loop Home"
-        >
-          <Logo size="md" />
-        </Link>
+      <header className="w-full px-6 py-5 flex items-center justify-between border-b border-ink/5 bg-cream">
+        <div className="flex items-center gap-6 sm:gap-8">
+          <Link
+            href="/"
+            className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded-lg"
+            aria-label="loop Home"
+          >
+            <Logo size="md" />
+          </Link>
+        </div>
 
-        <nav aria-label="Dashboard navigation" className="flex items-center gap-3">
+        <nav aria-label="Dashboard navigation" className="flex items-center gap-3 sm:gap-5">
           <Link
             href="/my-projects"
-            className="text-sm font-semibold px-4 py-2 rounded-full border border-black/10 transition-colors hover:bg-black/5"
-            style={{ color: 'var(--color-charcoal)' }}
+            className="text-sm font-semibold text-ink/75 hover:text-ink transition-colors px-2 py-1"
           >
-            My Projects
+            My projects
           </Link>
           <Link
             href="/explore"
-            className="text-sm font-semibold px-4 py-2 rounded-full border border-black/10 transition-colors hover:bg-black/5"
-            style={{ color: 'var(--color-charcoal)' }}
+            className="text-sm font-semibold text-ink/75 hover:text-ink transition-colors px-2 py-1"
           >
-            Explore projects
+            Explore
           </Link>
 
-          <span
-            className="text-sm font-medium hidden sm:inline"
-            style={{ color: 'var(--color-charcoal-soft)' }}
+          {/* Round avatar with first letter of display name */}
+          <div
+            className="w-9 h-9 rounded-full bg-blush-light text-ink border border-ink/10 flex items-center justify-center font-bold text-sm select-none shadow-xs"
+            aria-label={`User avatar for ${displayName}`}
+            title={displayName}
           >
-            {user.email}
-          </span>
+            {avatarInitial}
+          </div>
 
-          {/* Logout Form: State-changing POST request */}
-          <form action="/auth/signout" method="POST">
-            <button
+          {/* Logout Form: outline pill button */}
+          <form action="/auth/signout" method="POST" className="inline-flex">
+            <PillButton
+              variant="outline"
+              size="sm"
               type="submit"
-              className="text-sm font-medium px-4 py-2 rounded-full border border-black/10 transition-colors hover:bg-black/5"
-              style={{ color: 'var(--color-charcoal)' }}
             >
               Log out
-            </button>
+            </PillButton>
           </form>
         </nav>
       </header>
 
       {/* ── Main Dashboard Content ──────────────────────────────────────────── */}
-      <main id="main-content" className="flex-1 max-w-4xl w-full mx-auto px-6 py-12">
-        {/* Welcome Section */}
-        <section aria-labelledby="welcome-heading" className="mb-10">
-          <p className="text-sm font-semibold tracking-wide uppercase mb-2" style={{ color: 'var(--color-sage)' }}>
-            My Workspace
+      <main id="main-content" className="flex-1 max-w-6xl w-full mx-auto px-6 py-10 sm:py-14">
+        {/* Butter Welcome Banner */}
+        <section
+          aria-labelledby="welcome-heading"
+          className="w-full bg-butter rounded-[28px] p-8 sm:p-10 mb-10 shadow-[0_4px_24px_rgba(46,42,54,0.06)] border border-ink/5"
+        >
+          <p className="text-xs font-bold uppercase tracking-wider text-ink/70 mb-2">
+            MY WORKSPACE
           </p>
           <h1
             id="welcome-heading"
-            className="text-3xl sm:text-4xl font-bold tracking-tight mb-3"
-            style={{ color: 'var(--color-charcoal)' }}
+            className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-ink tracking-tight mb-2"
           >
             Welcome, {displayName}!
           </h1>
-          <p className="text-base" style={{ color: 'var(--color-charcoal-soft)' }}>
-            Your learning profile is set up and saved to Supabase.
+          <p className="font-body text-ink/80 text-sm sm:text-base">
+            Your learning profile is saved. Pick up where you left off.
           </p>
         </section>
 
-        {/* Personalized Project Discovery */}
+        {/* Suggested for You with Personalised chip */}
         <SuggestedProjects
           allProjects={catalogueResult.projects}
           preferences={preferences}
@@ -175,53 +179,54 @@ export default async function DashboardPage() {
           savedProjectIds={savedProjectIds}
         />
 
-        {/* Learning Preferences Summary Card */}
+        {/* Your Learning Preferences Card */}
         <section
           aria-labelledby="preferences-heading"
-          className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-black/5 mb-8"
+          className="bg-white rounded-[28px] p-6 sm:p-8 shadow-[0_4px_24px_rgba(46,42,54,0.06)] border border-ink/5 mb-8"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-black/5">
-            <div>
-              <h2 id="preferences-heading" className="text-lg font-semibold" style={{ color: 'var(--color-charcoal)' }}>
-                Your Learning Preferences
-              </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Saved preferences guide your future crochet recommendations.
-              </p>
-            </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h2
+              id="preferences-heading"
+              className="font-display font-bold text-xl sm:text-2xl text-ink"
+            >
+              Your learning preferences
+            </h2>
+
             <Link
               href="/onboarding?edit=true"
-              className="inline-flex items-center justify-center px-4 py-2 rounded-full text-xs font-semibold border border-black/10 transition-colors hover:bg-black/5 self-start sm:self-auto"
-              style={{ color: 'var(--color-charcoal)' }}
+              className="inline-flex items-center justify-center px-5 py-2 rounded-full text-xs font-semibold border border-ink/30 text-ink hover:bg-black/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink self-start sm:self-auto cursor-pointer"
             >
-              Edit learning preferences
+              Edit preferences
             </Link>
           </div>
 
-          <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-            <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-cream)' }}>
-              <dt className="font-medium text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--color-charcoal-soft)' }}>
-                Skill Level
+          <dl className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Tile 1: Skill Level */}
+            <div className="bg-sage-light rounded-[20px] p-5">
+              <dt className="text-xs font-bold uppercase tracking-wider text-sage-dark mb-1.5">
+                SKILL LEVEL
               </dt>
-              <dd className="font-semibold text-base" style={{ color: 'var(--color-charcoal)' }}>
+              <dd className="font-body font-bold text-base sm:text-lg text-ink">
                 {experienceLabel}
               </dd>
             </div>
 
-            <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-cream)' }}>
-              <dt className="font-medium text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--color-charcoal-soft)' }}>
-                Preferred Learning Style
+            {/* Tile 2: Learning Style */}
+            <div className="bg-blush-light rounded-[20px] p-5">
+              <dt className="text-xs font-bold uppercase tracking-wider text-ink/60 mb-1.5">
+                LEARNING STYLE
               </dt>
-              <dd className="font-semibold text-base" style={{ color: 'var(--color-charcoal)' }}>
+              <dd className="font-body font-bold text-base sm:text-lg text-ink">
                 {learningModeLabel}
               </dd>
             </div>
 
-            <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-cream)' }}>
-              <dt className="font-medium text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--color-charcoal-soft)' }}>
-                Interested in Making
+            {/* Tile 3: Interested in Making */}
+            <div className="bg-lilac-light rounded-[20px] p-5">
+              <dt className="text-xs font-bold uppercase tracking-wider text-ink/60 mb-1.5">
+                INTERESTED IN MAKING
               </dt>
-              <dd className="font-semibold text-base" style={{ color: 'var(--color-charcoal)' }}>
+              <dd className="font-body font-bold text-base sm:text-lg text-ink">
                 {interestsLabel}
               </dd>
             </div>
@@ -230,61 +235,56 @@ export default async function DashboardPage() {
 
         {/* Account Details Card */}
         <section
-          aria-label="Account status"
-          className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-black/5"
+          aria-labelledby="account-details-heading"
+          className="bg-white rounded-[28px] p-6 sm:p-8 shadow-[0_4px_24px_rgba(46,42,54,0.06)] border border-ink/5 mb-10"
         >
-          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-charcoal)' }}>
-            Account Details
+          <h2
+            id="account-details-heading"
+            className="font-display font-bold text-xl sm:text-2xl text-ink mb-6"
+          >
+            Account details
           </h2>
 
-          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-cream)' }}>
-              <dt className="font-medium text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--color-charcoal-soft)' }}>
-                Email
+          <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Display Name Tile */}
+            <div className="bg-cream/60 rounded-[20px] p-5 border border-ink/5">
+              <dt className="text-xs font-bold uppercase tracking-wider text-ink/60 mb-1.5">
+                DISPLAY NAME
               </dt>
-              <dd className="font-semibold break-all" style={{ color: 'var(--color-charcoal)' }}>
-                {user.email}
-              </dd>
-            </div>
-
-            <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-cream)' }}>
-              <dt className="font-medium text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--color-charcoal-soft)' }}>
-                Display Name
-              </dt>
-              <dd className="font-semibold" style={{ color: 'var(--color-charcoal)' }}>
+              <dd className="font-body font-bold text-base text-ink">
                 {displayName}
               </dd>
             </div>
 
-            {memberSince && (
-              <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-cream)' }}>
-                <dt className="font-medium text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--color-charcoal-soft)' }}>
-                  Member Since
-                </dt>
-                <dd className="font-semibold" style={{ color: 'var(--color-charcoal)' }}>
-                  {memberSince}
-                </dd>
-              </div>
-            )}
-
-            <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-cream)' }}>
-              <dt className="font-medium text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--color-charcoal-soft)' }}>
-                Status
+            {/* Member Since Tile */}
+            <div className="bg-cream/60 rounded-[20px] p-5 border border-ink/5">
+              <dt className="text-xs font-bold uppercase tracking-wider text-ink/60 mb-1.5">
+                MEMBER SINCE
               </dt>
-              <dd className="font-semibold flex items-center gap-1.5" style={{ color: 'var(--color-sage)' }}>
-                <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: 'var(--color-sage)' }} />
-                Onboarding Completed
+              <dd className="font-body font-bold text-base text-ink">
+                {memberSince || 'November 2026'}
+              </dd>
+            </div>
+
+            {/* Status Tile */}
+            <div className="bg-cream/60 rounded-[20px] p-5 border border-ink/5">
+              <dt className="text-xs font-bold uppercase tracking-wider text-ink/60 mb-1.5">
+                STATUS
+              </dt>
+              <dd className="font-body font-bold text-base text-ink">
+                {profile?.onboarding_completed ? 'Onboarding completed' : 'In progress'}
               </dd>
             </div>
           </dl>
-
-          <div className="mt-6 pt-6 border-t border-black/5 text-sm" style={{ color: 'var(--color-charcoal-soft)' }}>
-            <p>
-              Project patterns, guided steps, and video learning will be added in upcoming milestones.
-            </p>
-          </div>
         </section>
       </main>
+
+      {/* ── Footer ───────────────────────────────────────────────────── */}
+      <footer className="w-full px-6 py-8 border-t border-ink/5 text-center text-xs text-ink/60 font-body bg-cream">
+        <p>
+          loop Project Catalogue &bull; Starter previews. Step-by-step video and written lessons are in development.
+        </p>
+      </footer>
     </div>
   );
 }
