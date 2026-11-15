@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import type { MaterialItem, PatternStep } from '@/lib/tutorials/types';
 
 export interface GuidedStepsProps {
@@ -18,36 +19,45 @@ export default function GuidedSteps({
   materialsDetails = [],
   className = '',
 }: GuidedStepsProps) {
-  // Sort once; stable reference kept via useMemo-like pattern (props are plain arrays)
+  const searchParams = useSearchParams();
+
+  // Sort once by stepNumber
   const sortedSteps = [...steps].sort((a, b) => a.stepNumber - b.stepNumber);
   const totalSteps = sortedSteps.length;
 
-  // Reset index during render when the steps array reference changes
-  // (official React pattern: https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes)
-  const [prevSteps, setPrevSteps] = useState(steps);
-  const [activeIndex, setActiveIndex] = useState(0);
+  // Initialize activeIndex from URL query param ?step= if provided
+  const getInitialIndex = () => {
+    const stepParam = searchParams?.get('step');
+    if (stepParam) {
+      const parsed = parseInt(stepParam, 10);
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= sortedSteps.length) {
+        return parsed - 1;
+      }
+    }
+    return 0;
+  };
 
+  const [prevSteps, setPrevSteps] = useState(steps);
+  const [activeIndex, setActiveIndex] = useState(getInitialIndex);
+
+  // Reset index during render when the steps array reference changes
   if (steps !== prevSteps) {
     setPrevSteps(steps);
     setActiveIndex(0);
   }
 
-  // Collapsible materials panel
+  // Collapsible materials drawer
   const [materialsOpen, setMaterialsOpen] = useState(false);
 
   // ── Empty state ──────────────────────────────────────────────────────────────
   if (totalSteps === 0) {
     return (
       <section
-        className={`p-6 sm:p-8 rounded-3xl border ${className}`}
-        style={{
-          backgroundColor: 'rgba(195, 177, 212, 0.12)',
-          borderColor: 'var(--color-lilac)',
-        }}
+        className={`p-6 sm:p-8 rounded-[28px] border bg-lilac-light/40 border-lilac text-ink ${className}`}
         aria-label="Guided steps status"
       >
         <div className="flex items-start gap-4">
-          <div className="p-2.5 rounded-xl bg-purple-100 text-purple-700 mt-0.5 shrink-0">
+          <div className="p-2.5 rounded-xl bg-lilac/30 text-ink mt-0.5 shrink-0">
             <svg
               className="w-6 h-6"
               fill="none"
@@ -64,10 +74,10 @@ export default function GuidedSteps({
             </svg>
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-purple-950 mb-1">
-              Guided steps — coming soon
+            <h2 className="font-display text-lg sm:text-xl font-bold text-ink mb-1">
+              Written instructions coming soon
             </h2>
-            <p className="text-xs sm:text-sm leading-relaxed text-purple-900">
+            <p className="font-body text-sm leading-relaxed text-ink/75">
               Step-by-step guided instructions for this lesson are currently in preparation.
               Check back soon!
             </p>
@@ -82,26 +92,57 @@ export default function GuidedSteps({
   const currentStep = sortedSteps[safeIndex];
   const isFirst = safeIndex === 0;
   const isLast = safeIndex === totalSteps - 1;
+  const progressPercent = Math.round(((safeIndex + 1) / totalSteps) * 100);
 
-  // Abbreviations relevant to the current step
-  const stepAbbreviations = currentStep.abbreviations ?? [];
+  const updateStepIndex = (newIndex: number) => {
+    setActiveIndex(newIndex);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('step', String(newIndex + 1));
+      window.history.replaceState(null, '', url.toString());
+    }
+  };
+
+  const handlePrevious = () => {
+    if (!isFirst) {
+      updateStepIndex(safeIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (!isLast) {
+      updateStepIndex(safeIndex + 1);
+    }
+  };
+
+  const handleReset = () => {
+    updateStepIndex(0);
+  };
+
   const hasAbbrGlossary = Object.keys(abbreviations).length > 0;
   const hasMaterials = materialsDetails.length > 0;
 
+  // Format stitch count text nicely
+  const stitchCountText = currentStep.stitchCount
+    ? currentStep.stitchCount.toLowerCase().startsWith('stitch count')
+      ? currentStep.stitchCount
+      : `Stitch count: ${currentStep.stitchCount}`
+    : null;
+
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* ── Progress bar ──────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3">
-        <span
-          className="text-xs font-bold uppercase tracking-wider"
-          style={{ color: 'var(--color-sage-dark)' }}
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          Step {safeIndex + 1} of {totalSteps}
-        </span>
+      {/* ── Progress bar row ──────────────────────────────────────────────── */}
+      <div>
+        <div className="flex items-center justify-between text-sm font-semibold mb-2">
+          <span className="text-ink">
+            Step {safeIndex + 1} of {totalSteps}
+          </span>
+          <span className="text-ink/70">
+            {progressPercent}% done
+          </span>
+        </div>
         <div
-          className="flex-1 h-1.5 rounded-full bg-black/8 overflow-hidden"
+          className="w-full h-2 rounded-full bg-ink/10 overflow-hidden"
           role="progressbar"
           aria-valuenow={safeIndex + 1}
           aria-valuemin={1}
@@ -109,148 +150,73 @@ export default function GuidedSteps({
           aria-label={`Step ${safeIndex + 1} of ${totalSteps}`}
         >
           <div
-            className="h-full rounded-full transition-all duration-300"
-            style={{
-              width: `${((safeIndex + 1) / totalSteps) * 100}%`,
-              backgroundColor: 'var(--color-sage)',
-            }}
+            className="h-full rounded-full bg-sage transition-all duration-300"
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
 
-      {/* ── Step card ─────────────────────────────────────────────────────── */}
+      {/* ── Large white card ───────────────────────────────────────────────── */}
       <section
         aria-live="polite"
         aria-atomic="true"
         aria-label={`Step ${safeIndex + 1}: ${currentStep.title}`}
-        className="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-black/5"
+        className="bg-white rounded-[28px] p-8 sm:p-12 shadow-[0_4px_24px_rgba(46,42,54,0.06)] border border-ink/5"
       >
-        {/* Step header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-5 border-b border-black/5">
-          <div className="flex items-center gap-3">
-            <span
-              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-extrabold shrink-0 shadow-xs"
-              style={{
-                backgroundColor: 'var(--color-sage)',
-                color: '#1F1F1F',
-              }}
-              aria-hidden="true"
-            >
-              {currentStep.stepNumber}
+        {/* Butter stitch-count badge */}
+        {stitchCountText && (
+          <div className="mb-4">
+            <span className="inline-block px-3.5 py-1 rounded-full text-xs font-semibold bg-butter text-ink shadow-xs">
+              {stitchCountText}
             </span>
-            <h2
-              className="text-lg sm:text-xl font-bold"
-              style={{ color: 'var(--color-charcoal)' }}
-            >
-              {currentStep.title}
-            </h2>
-          </div>
-
-          {currentStep.stitchCount && (
-            <span
-              className="px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 self-start sm:self-auto"
-              style={{ backgroundColor: '#F3F4F6', color: '#374151' }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" aria-hidden="true" />
-              {currentStep.stitchCount}
-            </span>
-          )}
-        </div>
-
-        {/* Instruction body */}
-        <p className="text-sm sm:text-base leading-relaxed text-gray-800 mb-5">
-          {currentStep.instruction}
-        </p>
-
-        {/* Step abbreviation tags */}
-        {stepAbbreviations.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 mb-4">
-            <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
-              Stitches:
-            </span>
-            {stepAbbreviations.map((abbr) => (
-              <span
-                key={abbr}
-                title={hasAbbrGlossary ? abbreviations[abbr] : undefined}
-                className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#FAF7F0] border border-black/5 text-[#5E7A50]"
-              >
-                {abbr}
-                {hasAbbrGlossary && abbreviations[abbr] ? (
-                  <span className="hidden sm:inline text-[10px] font-normal text-gray-500 ml-1">
-                    — {abbreviations[abbr]}
-                  </span>
-                ) : null}
-              </span>
-            ))}
           </div>
         )}
 
-        {/* Maker tip callout */}
+        {/* Step title in Fraunces */}
+        <h2 className="font-display font-bold text-2xl sm:text-3xl text-ink tracking-tight mb-4">
+          {currentStep.title}
+        </h2>
+
+        {/* Instructions at 20px font size */}
+        <p className="font-body text-[20px] leading-relaxed text-ink/85 mb-6">
+          {currentStep.instruction}
+        </p>
+
+        {/* Butter-light "Maker tip" box */}
         {currentStep.notes && (
-          <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-xs sm:text-sm text-amber-950 leading-relaxed flex items-start gap-2.5">
-            <svg
-              className="w-4 h-4 text-amber-600 shrink-0 mt-0.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <div>
-              <span className="font-semibold text-amber-900">Maker tip: </span>
-              {currentStep.notes}
-            </div>
+          <div className="bg-butter-light rounded-2xl p-5 border border-butter/40 text-ink/90 text-sm sm:text-base leading-relaxed">
+            <strong className="font-bold text-ink">Maker tip: </strong>
+            {currentStep.notes.replace(/^Maker tip:\s*/i, '')}
           </div>
         )}
       </section>
 
-      {/* ── Navigation ────────────────────────────────────────────────────── */}
+      {/* ── Navigation controls ────────────────────────────────────────────── */}
       <div className="flex items-center justify-between gap-4">
-        {/* Previous */}
+        {/* Previous button */}
         <button
           type="button"
-          onClick={() => setActiveIndex((i) => Math.max(i - 1, 0))}
+          onClick={handlePrevious}
           disabled={isFirst}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold border border-black/10 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C9A6B] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:bg-black/5"
+          className="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold border border-ink/25 text-ink hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ink cursor-pointer"
           aria-label="Previous step"
         >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            aria-hidden="true"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Previous
+          &larr; Previous
         </button>
 
-        {/* Centre: last-step state or next */}
+        {/* Next / Last step controls */}
         {isLast ? (
-          <div className="flex flex-col items-center gap-2 text-center">
+          <div className="flex items-center gap-3">
             <span
-              className="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider"
-              style={{
-                backgroundColor: 'rgba(124, 154, 107, 0.15)',
-                color: 'var(--color-sage-dark)',
-              }}
+              className="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-sage-light text-sage-dark"
               role="status"
-              aria-live="polite"
             >
-              🎉 Last step
+              Last step
             </span>
             <button
               type="button"
-              onClick={() => setActiveIndex(0)}
-              className="text-xs font-semibold underline underline-offset-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C9A6B] focus-visible:ring-offset-2"
-              style={{ color: 'var(--color-sage-dark)' }}
+              onClick={handleReset}
+              className="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold border border-ink/25 text-ink hover:bg-black/5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ink cursor-pointer"
             >
               Back to first step
             </button>
@@ -258,92 +224,55 @@ export default function GuidedSteps({
         ) : (
           <button
             type="button"
-            onClick={() => setActiveIndex((i) => Math.min(i + 1, totalSteps - 1))}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C9A6B] focus-visible:ring-offset-2 hover:brightness-105"
-            style={{ backgroundColor: 'var(--color-sage)', color: '#1F1F1F' }}
+            onClick={handleNext}
+            className="inline-flex items-center justify-center px-7 py-2.5 rounded-full text-sm font-semibold bg-sage text-ink hover:bg-sage-dark hover:text-white transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ink cursor-pointer"
             aria-label="Next step"
           >
-            Next
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            Next &rarr;
           </button>
         )}
       </div>
 
-      {/* ── Collapsible Materials & Terminology ───────────────────────────── */}
+      {/* ── Collapsible Materials drawer ──────────────────────────────────── */}
       {(hasMaterials || hasAbbrGlossary) && (
-        <section
-          aria-labelledby="guided-reference-heading"
-          className="bg-white/80 rounded-3xl border border-black/5 overflow-hidden"
-        >
+        <section className="bg-white rounded-[24px] border border-ink/5 shadow-[0_4px_24px_rgba(46,42,54,0.04)] overflow-hidden">
           <button
             type="button"
-            id="guided-reference-heading"
             onClick={() => setMaterialsOpen((o) => !o)}
             aria-expanded={materialsOpen}
-            aria-controls="guided-reference-panel"
-            className="w-full flex items-center justify-between px-6 py-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C9A6B] focus-visible:ring-inset"
+            className="w-full flex items-center justify-between px-6 py-5 text-left font-display font-bold text-base text-ink hover:bg-cream/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink cursor-pointer"
           >
-            <span className="text-sm font-bold" style={{ color: 'var(--color-charcoal)' }}>
-              Materials, Tools &amp; Abbreviations
-            </span>
-            <svg
-              className={`w-4 h-4 transition-transform ${materialsOpen ? 'rotate-180' : ''}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            <span>Materials, tools &amp; abbreviations</span>
+            <span
+              className={`text-lg text-ink/60 transition-transform duration-200 inline-block ${
+                materialsOpen ? 'rotate-180' : ''
+              }`}
               aria-hidden="true"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+              ▾
+            </span>
           </button>
 
           {materialsOpen && (
-            <div id="guided-reference-panel" className="px-6 pb-6 space-y-6 border-t border-black/5 pt-5">
+            <div className="px-6 pb-6 pt-2 border-t border-ink/5 space-y-6">
               {/* Materials list */}
               {hasMaterials && (
                 <div>
-                  <h3
-                    className="text-xs font-bold uppercase tracking-wider mb-3"
-                    style={{ color: 'var(--color-charcoal-soft)' }}
-                  >
-                    Materials &amp; Tools
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-sage-dark mb-3">
+                    Materials &amp; Tools ({terminology} Terminology)
                   </h3>
-                  <ul className="divide-y divide-black/5">
-                    {materialsDetails.map((mat, index) => (
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-ink/80 font-body">
+                    {materialsDetails.map((mat, i) => (
                       <li
-                        key={index}
-                        className="py-3 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 text-sm"
+                        key={i}
+                        className="flex items-start gap-2 bg-cream/50 rounded-xl p-3 border border-ink/5"
                       >
-                        <div className="flex items-start gap-3">
-                          <span
-                            className="mt-0.5 px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider shrink-0"
-                            style={{
-                              backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                              color: 'var(--color-charcoal-soft)',
-                            }}
-                          >
-                            {mat.category}
-                          </span>
-                          <div>
-                            <span className="font-semibold text-gray-900">{mat.item}</span>
-                            {mat.notes && (
-                              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{mat.notes}</p>
-                            )}
-                          </div>
-                        </div>
-                        {mat.quantity && (
-                          <span className="sm:self-start text-xs font-medium text-emerald-900 bg-emerald-50 border border-emerald-200/60 rounded-md px-2.5 py-1 shrink-0">
-                            {mat.quantity}
-                          </span>
-                        )}
+                        <span className="w-1.5 h-1.5 rounded-full bg-sage mt-2 shrink-0" />
+                        <span>
+                          <strong className="font-semibold text-ink">{mat.item}</strong>
+                          {mat.quantity ? ` — ${mat.quantity}` : ''}
+                          {mat.notes ? ` (${mat.notes})` : ''}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -353,39 +282,20 @@ export default function GuidedSteps({
               {/* Abbreviations glossary */}
               {hasAbbrGlossary && (
                 <div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <h3
-                      className="text-xs font-bold uppercase tracking-wider"
-                      style={{ color: 'var(--color-charcoal-soft)' }}
-                    >
-                      Stitch Abbreviations
-                    </h3>
-                    <span
-                      className="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
-                      style={{
-                        backgroundColor: 'rgba(124, 154, 107, 0.15)',
-                        color: 'var(--color-sage)',
-                      }}
-                    >
-                      {terminology} Terminology
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {Object.entries(abbreviations).map(([abbr, full]) => (
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-sage-dark mb-3">
+                    Abbreviations Glossary
+                  </h3>
+                  <dl className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs font-body">
+                    {Object.entries(abbreviations).map(([abbr, meaning]) => (
                       <div
                         key={abbr}
-                        className="p-3 rounded-2xl bg-[#FAF7F0] border border-black/5 flex flex-col"
+                        className="bg-cream/50 rounded-xl p-3 border border-ink/5"
                       >
-                        <span
-                          className="font-bold text-xs uppercase tracking-wide"
-                          style={{ color: 'var(--color-sage-dark)' }}
-                        >
-                          {abbr}
-                        </span>
-                        <span className="text-xs text-gray-700 mt-0.5">{full}</span>
+                        <dt className="font-bold text-ink">{abbr}</dt>
+                        <dd className="text-ink/70 mt-0.5">{meaning}</dd>
                       </div>
                     ))}
-                  </div>
+                  </dl>
                 </div>
               )}
             </div>

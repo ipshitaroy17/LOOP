@@ -5,6 +5,7 @@ import WrittenInstructions from '@/components/tutorial/WrittenInstructions';
 import GuidedSteps from '@/components/tutorial/GuidedSteps';
 import TutorialViewSwitcher from '@/components/tutorial/TutorialViewSwitcher';
 import Logo from '@/components/Logo';
+import PillButton from '@/components/ui/PillButton';
 import { buildWatchUrl } from '@/lib/youtube/parseVideoId';
 import {
   BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE,
@@ -17,21 +18,8 @@ import {
  * It allows local testing of the YouTubePlayer, WrittenInstructions, and GuidedSteps
  * components against known draft candidates WITHOUT fetching private draft
  * database records or bypassing RLS.
- *
- * Allowlisted video IDs (the 4 draft candidates seeded in 04_video_candidates_draft.sql):
- *   GALGQdP_POw  — Bella Coco: Classic Granny Square
- *   RwnArj7HdXo  — Hooked by Robin: Classic Granny Square
- *   AXJpyGLFleM  — Hooked by Robin: Solid Granny Square (seamless)
- *   T7LxrBtpAXM  — Hooked by Robin: Sunburst Granny Square
- *
- * Allowlisted written/guided fixture (the 5 draft steps seeded in 02_beginner_square_tutorial.sql):
- *   beginner-practice-square — LOOP Foundational Single Crochet Swatch
- *
- * Public draft tutorial routes continue to return 404 (enforced by RLS + route gate).
- * No database queries are made here — this route contains only static fixture data.
  */
 
-// ── Production guard ──────────────────────────────────────────────────────────
 export const instant = false;
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
@@ -115,7 +103,7 @@ const PREVIEW_CANDIDATES: Record<string, PreviewCandidate> = {
     tutorialKey: 'main',
     creatorName: 'loop Curriculum Team',
     creatorUrl: null,
-    oEmbedTitle: 'Beginner Practice Square: Mastering Single Crochet Swatches',
+    oEmbedTitle: 'Beginner Practice Square',
     videoId: null,
     terminology: 'US',
   },
@@ -123,7 +111,7 @@ const PREVIEW_CANDIDATES: Record<string, PreviewCandidate> = {
 
 interface PreviewPageProps {
   params: Promise<{ videoId: string }>;
-  searchParams?: Promise<{ view?: string }>;
+  searchParams?: Promise<{ view?: string; step?: string }>;
 }
 
 export default async function TutorialPreviewPage({ params, searchParams }: PreviewPageProps) {
@@ -146,7 +134,6 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
   const watchUrl = meta.videoId ? buildWatchUrl(meta.videoId) : null;
 
   // Pattern steps & materials from fixture for beginner-practice-square
-  // For the 4 video candidates, steps are empty [] (never attach practice square to granny squares)
   const steps = isWrittenFixture ? BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE.steps || [] : [];
   const materialsDetails = isWrittenFixture
     ? BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE.materialsDetails
@@ -157,7 +144,6 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
   const hasSteps = steps.length > 0;
 
   // View state from query params (?view=video | ?view=written | ?view=guided)
-  // Default to 'guided' for written fixture with steps; default to 'video' for video candidates.
   const rawView = resolvedSearchParams.view;
   const activeView: 'video' | 'written' | 'guided' =
     rawView === 'guided'
@@ -170,161 +156,86 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
       ? 'guided'
       : 'video';
 
-  const videoHref = `/dev/tutorial-preview/${videoId}?view=video`;
-  const writtenHref = `/dev/tutorial-preview/${videoId}?view=written`;
-  const guidedHref = `/dev/tutorial-preview/${videoId}?view=guided`;
+  const stepQuery = resolvedSearchParams.step ? `&step=${resolvedSearchParams.step}` : '';
+  const videoHref = `/dev/tutorial-preview/${videoId}?view=video${stepQuery}`;
+  const writtenHref = `/dev/tutorial-preview/${videoId}?view=written${stepQuery}`;
+  const guidedHref = `/dev/tutorial-preview/${videoId}?view=guided${stepQuery}`;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-cream)' }}>
+    <div className="min-h-screen flex flex-col bg-cream text-ink">
       {/* ── Dev Warning Banner ────────────────────────────────────────── */}
       <div
-        className="w-full px-6 py-3 text-center text-xs font-semibold"
-        style={{ backgroundColor: '#FEF3C7', color: '#78350F' }}
+        className="w-full px-6 py-2.5 text-center text-xs font-semibold bg-butter-light text-ink/80 border-b border-butter/30"
         role="alert"
       >
         ⚠ Development preview — unreviewed draft candidate. This page is{' '}
-        <strong>disabled in production</strong> and does not expose database draft records.
+        <strong>disabled in production</strong>.
       </div>
 
-      {/* ── Header ───────────────────────────────────────────────────── */}
-      <header
-        className="w-full px-6 py-5 flex items-center justify-between border-b border-black/5"
-        style={{ backgroundColor: 'var(--color-cream)' }}
-      >
-        <div className="flex items-center gap-6">
+      {/* ── Top Navigation Bar ────────────────────────────────────────── */}
+      <header className="w-full px-6 py-5 flex items-center justify-between border-b border-ink/5 bg-cream">
+        <div className="flex items-center gap-6 sm:gap-8">
           <Link
             href="/"
-            className="inline-flex items-center"
+            className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded-lg"
             aria-label="loop Home"
           >
             <Logo size="md" />
           </Link>
-          <nav aria-label="Breadcrumb navigation" className="hidden sm:flex items-center gap-2 text-sm">
-            <Link
-              href="/dev/tutorial-preview"
-              className="text-xs font-medium transition-colors hover:underline"
-              style={{ color: 'var(--color-sage)' }}
-            >
-              Dev Preview
-            </Link>
-            <span className="text-gray-400" aria-hidden="true">&rsaquo;</span>
-            <span
-              className="text-xs font-medium truncate max-w-[200px]"
-              style={{ color: 'var(--color-charcoal-soft)' }}
-            >
-              {meta.oEmbedTitle}
-            </span>
-          </nav>
         </div>
+
+        <nav aria-label="Tutorial navigation" className="flex items-center gap-3 sm:gap-5">
+          <Link
+            href="/my-projects"
+            className="text-sm font-semibold text-ink/75 hover:text-ink transition-colors px-2 py-1"
+          >
+            My projects
+          </Link>
+          <Link
+            href="/explore"
+            className="text-sm font-semibold text-ink/75 hover:text-ink transition-colors px-2 py-1"
+          >
+            Explore
+          </Link>
+
+          {/* Avatar initial */}
+          <div
+            className="w-9 h-9 rounded-full bg-blush-light text-ink border border-ink/10 flex items-center justify-center font-bold text-sm select-none shadow-xs"
+            aria-hidden="true"
+          >
+            I
+          </div>
+
+          <form action="/auth/signout" method="POST" className="inline-flex">
+            <PillButton
+              variant="outline"
+              size="sm"
+              type="submit"
+            >
+              Log out
+            </PillButton>
+          </form>
+        </nav>
       </header>
 
       {/* ── Main Content ─────────────────────────────────────────────── */}
       <main id="main-content" className="flex-1 max-w-4xl w-full mx-auto px-6 py-8 sm:py-12">
         {/* Back link */}
-        <div className="mb-6">
+        <div className="mb-4">
           <Link
             href="/dev/tutorial-preview"
-            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider transition-colors hover:underline"
-            style={{ color: 'var(--color-sage)' }}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-ink/70 hover:text-ink transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
           >
-            <span aria-hidden="true">&larr;</span>
-            <span>All preview candidates</span>
+            <span>&larr; Back to project</span>
           </Link>
         </div>
 
-        {/* Draft notice */}
-        <div
-          className="mb-6 p-4 rounded-2xl border flex items-start gap-3"
-          style={{ backgroundColor: 'rgba(245, 216, 126, 0.15)', borderColor: 'var(--color-butter)' }}
-          role="note"
-          aria-label="Draft status notice"
-        >
-          <div className="p-1.5 rounded-lg bg-amber-100 text-amber-800 shrink-0 mt-0.5">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-          </div>
-          <div className="text-xs text-amber-900 leading-relaxed">
-            <p className="font-semibold mb-0.5">Unreviewed draft candidate ({isWrittenFixture ? 'Guided / Written Steps' : 'Video'})</p>
-            <p>
-              This content is stored as{' '}
-              <code className="bg-amber-100 px-1 rounded">review_status = &apos;draft&apos;</code>{' '}
-              and is invisible to all public users. This development preview loads a safe local fixture for UI verification without touching private database records.
-            </p>
-          </div>
-        </div>
+        {/* Title in Fraunces */}
+        <h1 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-ink tracking-tight mb-6">
+          {meta.projectTitle}
+        </h1>
 
-        {/* Title card */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-black/5 shadow-sm mb-8">
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <span
-              className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
-              style={{ backgroundColor: 'rgba(245, 216, 126, 0.3)', color: '#78350F' }}
-            >
-              Draft Preview
-            </span>
-            <span
-              className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
-              style={{ backgroundColor: 'rgba(124, 154, 107, 0.15)', color: 'var(--color-sage)' }}
-            >
-              {meta.terminology} Terms
-            </span>
-            <span
-              className="px-3 py-1 rounded-full text-xs font-medium"
-              style={{ backgroundColor: 'rgba(0,0,0,0.04)', color: 'var(--color-charcoal-soft)' }}
-            >
-              by{' '}
-              {meta.creatorUrl ? (
-                <a
-                  href={meta.creatorUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold hover:underline"
-                  style={{ color: 'var(--color-sage-dark)' }}
-                >
-                  {meta.creatorName}
-                </a>
-              ) : (
-                <span className="font-semibold">{meta.creatorName}</span>
-              )}
-            </span>
-          </div>
-
-          <p className="text-xs uppercase font-bold tracking-wider mb-1" style={{ color: 'var(--color-sage)' }}>
-            Project: {meta.projectTitle}
-          </p>
-          <h1
-            className="text-xl sm:text-3xl font-extrabold tracking-tight mb-2"
-            style={{ color: 'var(--color-charcoal)' }}
-          >
-            {meta.oEmbedTitle}
-          </h1>
-          <p className="text-xs text-gray-500 font-mono mb-4">
-            tutorial_key: {meta.tutorialKey} {meta.videoId ? `• video_id: ${meta.videoId}` : '• written_fixture: 5 steps'}
-          </p>
-
-          {watchUrl && (
-            <a
-              href={watchUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold border transition-colors hover:bg-black/5"
-              style={{ color: 'var(--color-charcoal)', borderColor: 'rgba(0,0,0,0.12)' }}
-            >
-              <svg className="w-4 h-4 text-red-600 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
-              </svg>
-              Open on YouTube
-            </a>
-          )}
-        </div>
-
-        {/* ── View Switcher ──────────────────────────────────────────────── */}
+        {/* ── View Switcher: Video / Guided / Written ────────────────────── */}
         <div className="mb-8">
           <TutorialViewSwitcher
             activeView={activeView}
@@ -337,193 +248,121 @@ export default async function TutorialPreviewPage({ params, searchParams }: Prev
           />
         </div>
 
-        {/* ── View Panels ────────────────────────────────────────────────── */}
+        {/* ── View Panels (kept mounted to preserve step state) ──────────── */}
 
         {/* Panel 1: Video View */}
-        {activeView === 'video' && (
-          <div id="panel-video" role="tabpanel" aria-labelledby="tab-video" className="space-y-6">
-            {hasVideo && meta.videoId ? (
-              <section aria-label="Video preview">
-                <YouTubePlayer videoId={meta.videoId} title={`Preview: ${meta.oEmbedTitle}`} />
-                <div className="mt-3 flex items-center justify-between text-xs text-gray-600 px-1">
-                  <span>
-                    Video by{' '}
-                    {meta.creatorUrl ? (
-                      <a
-                        href={meta.creatorUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-semibold hover:underline"
-                        style={{ color: 'var(--color-sage-dark)' }}
-                      >
-                        {meta.creatorName}
-                      </a>
-                    ) : (
-                      meta.creatorName
-                    )}{' '}
-                    on YouTube
-                  </span>
-                  {watchUrl && (
+        <div
+          id="panel-video"
+          role="tabpanel"
+          aria-labelledby="tab-video"
+          className={`space-y-6 ${activeView === 'video' ? 'block' : 'hidden'}`}
+        >
+          {hasVideo && meta.videoId ? (
+            <section aria-label="Video preview">
+              <YouTubePlayer videoId={meta.videoId} title={`Preview: ${meta.oEmbedTitle}`} />
+              <div className="mt-3 flex items-center justify-between text-xs text-ink/70 px-1 font-body">
+                <span>
+                  Video by{' '}
+                  {meta.creatorUrl ? (
                     <a
-                      href={watchUrl}
+                      href={meta.creatorUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:underline"
-                      style={{ color: 'var(--color-sage-dark)' }}
+                      className="font-semibold text-sage-dark hover:underline"
                     >
-                      Open on YouTube ↗
+                      {meta.creatorName}
                     </a>
-                  )}
-                </div>
-              </section>
-            ) : (
-              <section className="p-6 sm:p-8 rounded-3xl bg-white border border-black/5" aria-label="No video notice">
-                <div className="flex items-start gap-4">
-                  <div className="p-2.5 rounded-xl bg-gray-100 text-gray-600 mt-0.5 shrink-0">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-1">
-                      No video recorded for this draft lesson
-                    </h2>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-4">
-                      The Beginner Practice Square is drafted with 5 structured steps. Switch to Guided Steps or Written Instructions to follow along.
-                    </p>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <Link
-                        href={guidedHref}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-all hover:brightness-105"
-                        style={{ backgroundColor: 'var(--color-sage)', color: '#1F1F1F' }}
-                      >
-                        Open Guided Steps &rarr;
-                      </Link>
-                      <Link
-                        href={writtenHref}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold border border-black/10 transition-all hover:bg-black/5"
-                      >
-                        View Written Instructions
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-          </div>
-        )}
+                  ) : (
+                    meta.creatorName
+                  )}{' '}
+                  on YouTube
+                </span>
+                {watchUrl && (
+                  <a
+                    href={watchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline text-sage-dark font-medium"
+                  >
+                    Open on YouTube &rarr;
+                  </a>
+                )}
+              </div>
+            </section>
+          ) : (
+            <section className="p-8 sm:p-10 rounded-[28px] bg-white border border-ink/5 shadow-[0_4px_24px_rgba(46,42,54,0.06)]" aria-label="No video notice">
+              <h2 className="font-display text-xl font-bold text-ink mb-2">
+                No video recorded for this draft lesson
+              </h2>
+              <p className="font-body text-sm text-ink/75 mb-6 leading-relaxed">
+                The Beginner Practice Square is drafted with structured written and guided steps.
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href={guidedHref}
+                  className="px-6 py-2.5 rounded-full text-xs font-semibold bg-sage text-ink hover:bg-sage-dark hover:text-white transition-all shadow-xs"
+                >
+                  Open Guided Steps &rarr;
+                </Link>
+                <Link
+                  href={writtenHref}
+                  className="px-6 py-2.5 rounded-full text-xs font-semibold border border-ink/20 text-ink hover:bg-black/5 transition-all"
+                >
+                  View Written Instructions
+                </Link>
+              </div>
+            </section>
+          )}
+        </div>
 
         {/* Panel 2: Guided Steps View */}
-        {activeView === 'guided' && (
-          <div id="panel-guided" role="tabpanel" aria-labelledby="tab-guided">
-            <GuidedSteps
-              steps={steps}
-              terminology={meta.terminology}
-              abbreviations={abbreviations}
-              materialsDetails={materialsDetails}
-            />
-          </div>
-        )}
+        <div
+          id="panel-guided"
+          role="tabpanel"
+          aria-labelledby="tab-guided"
+          className={activeView === 'guided' ? 'block' : 'hidden'}
+        >
+          <GuidedSteps
+            steps={steps}
+            terminology={meta.terminology}
+            abbreviations={abbreviations}
+            materialsDetails={materialsDetails}
+          />
+        </div>
 
         {/* Panel 3: Written View */}
-        {activeView === 'written' && (
-          <div id="panel-written" role="tabpanel" aria-labelledby="tab-written">
-            {/* Reuses the exact same WrittenInstructions component used in public pages */}
-            <WrittenInstructions
-              terminology={meta.terminology}
-              materialsDetails={materialsDetails}
-              abbreviations={abbreviations}
-              steps={steps}
-              patternSourceTitle={
-                isWrittenFixture
-                  ? BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE.patternSourceTitle
-                  : null
-              }
-              patternSourceAuthor={
-                isWrittenFixture
-                  ? BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE.patternSourceAuthor
-                  : null
-              }
-              patternLicense={
-                isWrittenFixture
-                  ? BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE.patternLicense
-                  : null
-              }
-            />
-          </div>
-        )}
-
-        {/* Review checklist */}
-        <section className="mt-12 bg-white rounded-3xl p-6 sm:p-8 border border-black/5 shadow-sm">
-          <h2 className="text-base sm:text-lg font-bold mb-4" style={{ color: 'var(--color-charcoal)' }}>
-            Day 10 Guided Steps UI Checklist
-          </h2>
-          <ul className="space-y-3 text-xs sm:text-sm text-gray-700">
-            {[
-              {
-                label: 'Step Progression & Display',
-                detail:
-                  'Displays "Step X of Y", step title, instructions, stitch count badge, and maker tip when present.',
-              },
-              {
-                label: 'Local Navigation Controls',
-                detail:
-                  'Previous button disabled on step 1. Next button advances until final step. Final step displays "Last step" status without persisting completion.',
-              },
-              {
-                label: 'Back to First Step',
-                detail:
-                  'On the final step, a "Back to first step" control resets back to step 1.',
-              },
-              {
-                label: 'Reference Access',
-                detail:
-                  'Collapsible Materials, Tools & Abbreviations drawer is accessible directly within Guided mode.',
-              },
-              {
-                label: 'Learning Mode Switcher',
-                detail:
-                  'Three-way switcher (?view=video | ?view=guided | ?view=written) preserves parameters and survives page reloads.',
-              },
-              {
-                label: 'Empty State (Honest Availability)',
-                detail:
-                  'On the 4 granny square candidates (which have no written steps), Guided Steps shows the honest "Coming soon" notice.',
-              },
-              {
-                label: 'Production Inaccessibility',
-                detail:
-                  'This preview is permanently disabled in production builds (returns HTTP 404).',
-              },
-            ].map((item, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span
-                  className="w-5 h-5 rounded-full border-2 shrink-0 mt-0.5"
-                  style={{ borderColor: 'var(--color-sage)' }}
-                  aria-hidden="true"
-                />
-                <div>
-                  <span className="font-semibold" style={{ color: 'var(--color-charcoal)' }}>
-                    {item.label}:
-                  </span>{' '}
-                  {item.detail}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <div
+          id="panel-written"
+          role="tabpanel"
+          aria-labelledby="tab-written"
+          className={activeView === 'written' ? 'block' : 'hidden'}
+        >
+          <WrittenInstructions
+            terminology={meta.terminology}
+            materialsDetails={materialsDetails}
+            abbreviations={abbreviations}
+            steps={steps}
+            patternSourceTitle={
+              isWrittenFixture
+                ? BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE.patternSourceTitle
+                : null
+            }
+            patternSourceAuthor={
+              isWrittenFixture
+                ? BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE.patternSourceAuthor
+                : null
+            }
+            patternLicense={
+              isWrittenFixture
+                ? BEGINNER_PRACTICE_SQUARE_TUTORIAL_FIXTURE.patternLicense
+                : null
+            }
+          />
+        </div>
       </main>
 
       {/* ── Footer ───────────────────────────────────────────────────── */}
-      <footer
-        className="w-full px-6 py-8 border-t border-black/5 text-center text-xs"
-        style={{ backgroundColor: 'var(--color-cream)', color: 'var(--color-charcoal-soft)' }}
-      >
+      <footer className="w-full px-6 py-8 border-t border-ink/5 text-center text-xs text-ink/60 font-body bg-cream">
         <p>loop &bull; Development preview — not publicly accessible.</p>
       </footer>
     </div>
