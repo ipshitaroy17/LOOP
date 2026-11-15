@@ -22,18 +22,13 @@ function NavFallback() {
     <div className="flex items-center gap-2 sm:gap-3">
       <Link
         href="/login"
-        className="text-sm font-medium rounded-md px-3 py-2 transition-colors hover:text-black"
-        style={{ color: 'var(--color-charcoal)' }}
+        className="text-sm font-semibold rounded-full px-4 py-2 border border-ink/15 text-ink hover:bg-black/5 transition-colors"
       >
         Log in
       </Link>
       <Link
         href="/signup"
-        className="text-sm font-semibold rounded-full px-4 py-2 transition-colors hover:brightness-105"
-        style={{
-          backgroundColor: 'var(--color-sage)',
-          color: '#1F1F1F',
-        }}
+        className="text-sm font-semibold rounded-full px-5 py-2 bg-sage hover:bg-sage-dark text-ink hover:text-white transition-colors"
       >
         Sign up
       </Link>
@@ -82,39 +77,31 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const savedProjectIds = Array.from(savedProjectIdsSet);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-cream)' }}>
+    <div className="min-h-screen flex flex-col bg-cream text-ink">
       {/* ── Top Navigation Bar ────────────────────────────────────────── */}
-      <header
-        className="w-full px-6 py-5 flex items-center justify-between border-b border-black/5"
-        style={{ backgroundColor: 'var(--color-cream)' }}
-      >
-        <div className="flex items-center gap-6">
+      <header className="w-full px-6 py-5 flex items-center justify-between border-b border-ink/5 bg-cream">
+        <div className="flex items-center gap-6 sm:gap-8">
           <Link
             href="/"
-            className="inline-flex items-center"
+            className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded-lg"
             aria-label="loop Home"
           >
             <Logo size="md" />
           </Link>
 
-          <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-4 text-sm font-medium">
+          <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-2 text-sm font-semibold">
             <Link
               href="/explore"
-              className="px-3 py-1.5 rounded-full font-semibold"
-              style={{
-                backgroundColor: 'rgba(124, 154, 107, 0.15)',
-                color: 'var(--color-sage)',
-              }}
+              className="px-4 py-1.5 rounded-full bg-sage-light text-sage-dark"
               aria-current="page"
             >
               Explore
             </Link>
             <Link
               href="/#how-it-works"
-              className="px-3 py-1.5 rounded-full transition-colors hover:bg-black/5"
-              style={{ color: 'var(--color-charcoal-soft)' }}
+              className="px-4 py-1.5 rounded-full text-ink/75 hover:bg-ink/5 transition-colors"
             >
-              How it works
+              How loop works
             </Link>
           </nav>
         </div>
@@ -130,25 +117,19 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
       <main id="main-content" className="flex-1 max-w-6xl w-full mx-auto px-6 py-10 sm:py-14">
         {/* Page Title & Context Header */}
         <div className="mb-8 max-w-2xl">
-          <p
-            className="text-xs font-semibold uppercase tracking-wider mb-2"
-            style={{ color: 'var(--color-sage)' }}
-          >
+          <p className="text-xs font-bold uppercase tracking-wider text-sage-dark mb-2">
             Project Catalogue
           </p>
-          <h1
-            className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3"
-            style={{ color: 'var(--color-charcoal)' }}
-          >
-            Explore Crochet Projects
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-[64px] font-bold tracking-tight leading-[1.08] text-ink mb-4">
+            Explore crochet projects
           </h1>
-          <p className="text-base leading-relaxed" style={{ color: 'var(--color-charcoal-soft)' }}>
+          <p className="font-body text-ink/75 text-base sm:text-lg leading-relaxed">
             Discover starter projects, practice swatches, and mindful crochet motifs. Filter by skill level or category to preview your next make.
           </p>
         </div>
 
-        {/* Filter Controls (Client component connected to URL search params) */}
-        <Suspense fallback={<div className="h-32 bg-white rounded-2xl animate-pulse mb-8" />}>
+        {/* Filter Controls (Single rounded card holding search, category, and difficulty) */}
+        <Suspense fallback={<div className="h-28 bg-white rounded-[28px] animate-pulse mb-10 border border-ink/5" />}>
           <ExploreFilters totalCount={queryResult.totalCount} />
         </Suspense>
 
@@ -171,13 +152,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
       </main>
 
       {/* ── Footer ───────────────────────────────────────────────────── */}
-      <footer
-        className="w-full px-6 py-8 border-t border-black/5 text-center text-xs"
-        style={{
-          backgroundColor: 'var(--color-cream)',
-          color: 'var(--color-charcoal-soft)',
-        }}
-      >
+      <footer className="w-full px-6 py-8 border-t border-ink/5 text-center text-xs text-ink/60 font-body bg-cream">
         <p>
           loop Project Catalogue &bull; Starter previews. Step-by-step video and written lessons are in development.
         </p>
@@ -185,4 +160,3 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     </div>
   );
 }
-

@@ -24,9 +24,9 @@ export default function ProjectGrid({
     return (
       <div
         role="alert"
-        className="w-full bg-white rounded-2xl p-8 sm:p-12 text-center border border-red-200 shadow-sm"
+        className="w-full bg-white rounded-[28px] p-8 sm:p-12 text-center border border-red-200 shadow-[0_4px_24px_rgba(46,42,54,0.06)]"
       >
-        <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4">
+        <div className="w-12 h-12 rounded-full bg-blush-light text-ink flex items-center justify-center mx-auto mb-4">
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
@@ -36,18 +36,14 @@ export default function ProjectGrid({
             />
           </svg>
         </div>
-        <h3 className="text-lg font-bold text-red-900 mb-2">Unable to Load Catalogue</h3>
-        <p className="text-sm text-red-700 max-w-md mx-auto mb-6 leading-relaxed">
+        <h3 className="font-display text-xl font-bold text-ink mb-2">Unable to Load Catalogue</h3>
+        <p className="font-body text-sm text-ink/75 max-w-md mx-auto mb-6 leading-relaxed">
           {error}
         </p>
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="px-6 py-2.5 rounded-full text-xs font-semibold shadow-sm transition-all hover:brightness-105"
-          style={{
-            backgroundColor: 'var(--color-sage)',
-            color: '#1F1F1F',
-          }}
+          className="px-6 py-2.5 rounded-full text-xs font-semibold bg-sage text-ink hover:bg-sage-dark hover:text-white transition-all shadow-xs cursor-pointer"
         >
           Try again
         </button>
@@ -60,8 +56,8 @@ export default function ProjectGrid({
     // 2a. Filter/search returned no results
     if (hasActiveFilters) {
       return (
-        <div className="w-full bg-white rounded-2xl p-8 sm:p-12 text-center border border-black/5 shadow-sm">
-          <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-700 flex items-center justify-center mx-auto mb-4">
+        <div className="w-full bg-white rounded-[28px] p-8 sm:p-12 text-center border border-ink/5 shadow-[0_4px_24px_rgba(46,42,54,0.06)]">
+          <div className="w-12 h-12 rounded-full bg-butter-light text-ink flex items-center justify-center mx-auto mb-4">
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
@@ -71,22 +67,15 @@ export default function ProjectGrid({
               />
             </svg>
           </div>
-          <h3
-            className="text-lg font-bold mb-2"
-            style={{ color: 'var(--color-charcoal)' }}
-          >
+          <h3 className="font-display text-xl font-bold text-ink mb-2">
             No matching projects found
           </h3>
-          <p
-            className="text-sm max-w-md mx-auto mb-6 leading-relaxed"
-            style={{ color: 'var(--color-charcoal-soft)' }}
-          >
+          <p className="font-body text-sm text-ink/75 max-w-md mx-auto mb-6 leading-relaxed">
             We couldn&apos;t find any crochet projects matching your current search or filter combination.
           </p>
           <Link
             href="/explore"
-            className="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-xs font-semibold border border-black/15 transition-colors hover:bg-black/5"
-            style={{ color: 'var(--color-charcoal)' }}
+            className="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-xs font-semibold border border-ink/15 text-ink hover:bg-cream transition-colors cursor-pointer"
           >
             Clear all filters
           </Link>
@@ -96,8 +85,8 @@ export default function ProjectGrid({
 
     // 2b. Genuine empty catalogue (0 published rows in database)
     return (
-      <div className="w-full bg-white rounded-2xl p-8 sm:p-12 text-center border border-black/5 shadow-sm">
-        <div className="w-12 h-12 rounded-full bg-[#FAF7F0] text-gray-500 flex items-center justify-center mx-auto mb-4">
+      <div className="w-full bg-white rounded-[28px] p-8 sm:p-12 text-center border border-ink/5 shadow-[0_4px_24px_rgba(46,42,54,0.06)]">
+        <div className="w-12 h-12 rounded-full bg-cream text-ink/60 flex items-center justify-center mx-auto mb-4">
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
@@ -107,33 +96,28 @@ export default function ProjectGrid({
             />
           </svg>
         </div>
-        <h3
-          className="text-lg font-bold mb-2"
-          style={{ color: 'var(--color-charcoal)' }}
-        >
+        <h3 className="font-display text-xl font-bold text-ink mb-2">
           No projects published yet
         </h3>
-        <p
-          className="text-sm max-w-md mx-auto leading-relaxed"
-          style={{ color: 'var(--color-charcoal-soft)' }}
-        >
+        <p className="font-body text-sm text-ink/75 max-w-md mx-auto leading-relaxed">
           The loop crochet project catalogue is currently getting ready. Starter projects will appear here once published.
         </p>
       </div>
     );
   }
 
-  // 3. Grid of project cards
+  // 3. Grid of project cards (1 column on phone, 3 columns on desktop)
   return (
     <div
       role="region"
       aria-label="Crochet projects catalogue"
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
     >
       {projects.map((project, idx) => (
         <ProjectCard
           key={project.id}
           project={project}
+          index={idx}
           priority={idx < 3}
           initialIsSaved={savedProjectIds.includes(project.id)}
           searchQueryString={searchQueryString}
@@ -142,4 +126,3 @@ export default function ProjectGrid({
     </div>
   );
 }
-

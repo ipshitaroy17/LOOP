@@ -6,9 +6,18 @@ import { useState } from 'react';
 import type { Project } from '@/lib/catalogue/types';
 import { getCategoryLabel, getDifficultyLabel } from '@/lib/catalogue/categories';
 import SaveButton from './SaveButton';
+import Chip from '@/components/ui/Chip';
+
+const PASTEL_BGS = [
+  'bg-blush-light',
+  'bg-sage-light',
+  'bg-butter-light',
+  'bg-lilac-light',
+];
 
 interface ProjectCardProps {
   project: Project;
+  index?: number;
   priority?: boolean;
   initialIsSaved?: boolean;
   searchQueryString?: string;
@@ -16,6 +25,7 @@ interface ProjectCardProps {
 
 export default function ProjectCard({
   project,
+  index = 0,
   priority = false,
   initialIsSaved = false,
   searchQueryString,
@@ -24,34 +34,36 @@ export default function ProjectCard({
     project.thumbnail_url || '/illustrations/projects/project-placeholder.svg'
   );
 
-  const difficultyColor = (() => {
+  const bgClass = PASTEL_BGS[index % PASTEL_BGS.length];
+
+  const difficultyVariant = (() => {
     switch (project.difficulty) {
       case 'beginner':
-        return { bg: '#E8F3E5', text: '#2C5A24', border: '#7C9A6B' };
-      case 'easy':
-        return { bg: '#FEF9E7', text: '#7D5A08', border: '#F5D87E' };
+        return 'sage-light';
       case 'intermediate':
-        return { bg: '#F4EEF8', text: '#552D75', border: '#C3B1D4' };
+        return 'lilac-light';
+      case 'easy':
+        return 'butter-light';
       case 'advanced':
-        return { bg: '#FDF2F2', text: '#8A2020', border: '#E8B4B8' };
+        return 'blush-light';
       default:
-        return { bg: '#F3F4F6', text: '#374151', border: '#D1D5DB' };
+        return 'sage-light';
     }
-  })();
+  })() as 'sage-light' | 'lilac-light' | 'butter-light' | 'blush-light';
 
   const projectHref = searchQueryString
     ? `/projects/${project.slug}?${searchQueryString}`
     : `/projects/${project.slug}`;
 
   return (
-    <article className="group bg-white rounded-2xl overflow-hidden border border-black/5 shadow-sm hover:shadow-md transition-all flex flex-col h-full">
+    <article className="group bg-white rounded-[28px] overflow-hidden border border-ink/5 shadow-[0_4px_24px_rgba(46,42,54,0.06)] hover:shadow-[0_8px_32px_rgba(46,42,54,0.1)] transition-all flex flex-col h-full">
       <Link
         href={projectHref}
-        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C9A6B] focus-visible:ring-offset-2 rounded-2xl flex-1 flex flex-col"
-        aria-label={`View project details for ${project.title}`}
+        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 rounded-[28px] flex-1 flex flex-col"
+        aria-label={`Preview project details for ${project.title}`}
       >
-        {/* Project Illustration Header */}
-        <div className="relative w-full aspect-[4/3] bg-[#F4EFE6] overflow-hidden flex items-center justify-center">
+        {/* Project Image Area in Rotating Pastel */}
+        <div className={`relative w-full aspect-[4/3] ${bgClass} overflow-hidden flex items-center justify-center`}>
           <Image
             src={imgSrc}
             alt=""
@@ -64,8 +76,8 @@ export default function ProjectCard({
             }}
           />
 
-          {/* Save / Bookmark Button */}
-          <div className="absolute top-3 left-3 z-10">
+          {/* Top Left: Save pill */}
+          <div className="absolute top-3.5 left-3.5 z-10">
             <SaveButton
               projectId={project.id}
               initialIsSaved={initialIsSaved}
@@ -74,54 +86,33 @@ export default function ProjectCard({
             />
           </div>
 
-          {/* Tutorial Coming Soon Badge */}
-          <div className="absolute top-3 right-3">
-            <span
-              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide shadow-sm"
-              style={{
-                backgroundColor: 'rgba(250, 247, 240, 0.95)',
-                color: 'var(--color-charcoal)',
-                border: '1px solid rgba(0, 0, 0, 0.08)',
-              }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 inline-block" />
+          {/* Top Right: Tutorial coming soon pill */}
+          <div className="absolute top-3.5 right-3.5 z-10">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/95 text-ink shadow-xs border border-ink/5">
+              <span className="w-1.5 h-1.5 rounded-full bg-butter border border-ink/20 inline-block" />
               Tutorial coming soon
             </span>
           </div>
 
-          {/* Category Pill */}
-          <div className="absolute bottom-3 left-3">
-            <span
-              className="inline-block px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                color: 'var(--color-charcoal)',
-              }}
-            >
+          {/* Bottom Left: Category chip */}
+          <div className="absolute bottom-3.5 left-3.5 z-10">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-white/95 text-ink shadow-xs border border-ink/5 backdrop-blur-xs">
               {getCategoryLabel(project.category)}
             </span>
           </div>
         </div>
 
         {/* Card Body */}
-        <div className="p-5 flex-1 flex flex-col justify-between">
+        <div className="p-6 flex-1 flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span
-                className="px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wider"
-                style={{
-                  backgroundColor: difficultyColor.bg,
-                  color: difficultyColor.text,
-                }}
-              >
+            {/* Difficulty Chip */}
+            <div className="flex items-center gap-2 mb-3">
+              <Chip variant={difficultyVariant} size="sm">
                 {getDifficultyLabel(project.difficulty)}
-              </span>
+              </Chip>
 
               {project.estimated_duration && (
-                <span
-                  className="text-xs font-medium flex items-center gap-1"
-                  style={{ color: 'var(--color-charcoal-soft)' }}
-                >
+                <span className="text-xs font-medium text-ink/60 flex items-center gap-1">
                   <svg
                     className="w-3.5 h-3.5"
                     fill="none"
@@ -141,29 +132,24 @@ export default function ProjectCard({
               )}
             </div>
 
-            <h3
-              className="text-lg font-bold tracking-tight mb-2 group-hover:text-[#7C9A6B] transition-colors line-clamp-1"
-              style={{ color: 'var(--color-charcoal)' }}
-            >
+            {/* Fraunces Title */}
+            <h3 className="font-display font-bold text-xl sm:text-2xl text-ink leading-snug mb-2 group-hover:text-sage-dark transition-colors line-clamp-1">
               {project.title}
             </h3>
 
+            {/* Two-line Description */}
             {project.description && (
-              <p
-                className="text-sm line-clamp-2 leading-relaxed"
-                style={{ color: 'var(--color-charcoal-soft)' }}
-              >
+              <p className="font-body text-ink/75 text-sm leading-relaxed line-clamp-2">
                 {project.description}
               </p>
             )}
           </div>
 
-          {/* Card Footer Link Prompt */}
-          <div className="mt-5 pt-3 border-t border-black/5 flex items-center justify-between text-xs font-semibold">
-            <span style={{ color: 'var(--color-sage)' }}>Preview project details</span>
+          {/* Card Link: "Preview project details →" */}
+          <div className="mt-6 pt-4 border-t border-ink/5 flex items-center justify-between text-xs sm:text-sm font-semibold text-sage-dark">
+            <span>Preview project details</span>
             <span
               className="group-hover:translate-x-1 transition-transform inline-block"
-              style={{ color: 'var(--color-sage)' }}
               aria-hidden="true"
             >
               &rarr;
@@ -174,4 +160,3 @@ export default function ProjectCard({
     </article>
   );
 }
-
